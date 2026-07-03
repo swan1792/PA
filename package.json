@@ -2,6 +2,7 @@
   "name": "pa-app",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
   "description": "PA App - Web, API, and Mobile monorepo",
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
