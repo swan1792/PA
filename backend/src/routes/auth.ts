@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
+import crypto from 'crypto'
 import { UserModel } from '../models/user'
 import { AppError } from '../middleware/errorHandler'
 import { asyncHandler } from '../utils/asyncHandler'
@@ -24,7 +25,7 @@ router.post('/register', asyncHandler(async (req: Request, res: Response) => {
   const { email, name, password } = registerSchema.parse(req.body)
 
   // Check if user exists
-  const existing = UserModel.findByEmail(email)
+  const existing = await UserModel.findByEmail(email)
   if (existing) {
     throw new AppError('Email already registered', 400)
   }
@@ -34,7 +35,7 @@ router.post('/register', asyncHandler(async (req: Request, res: Response) => {
   const id = crypto.randomUUID()
 
   // Create user
-  UserModel.create({ id, email, name, password_hash: passwordHash })
+  await UserModel.create({ id, email, name, password_hash: passwordHash })
 
   // Generate token
   const token = jwt.sign({ userId: id }, JWT_SECRET, { expiresIn: '7d' })
@@ -51,7 +52,7 @@ router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = loginSchema.parse(req.body)
 
   // Find user
-  const user = UserModel.findByEmail(email)
+  const user = await UserModel.findByEmail(email)
   if (!user) {
     throw new AppError('Invalid credentials', 401)
   }

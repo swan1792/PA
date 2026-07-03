@@ -32,30 +32,30 @@ const updateTaskSchema = z.object({
 })
 
 // Get all tasks
-router.get('/', authenticate, (req: AuthRequest, res: Response) => {
-  const tasks = TaskModel.findAll(req.userId!)
+router.get('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const tasks = await TaskModel.findAll(req.userId!)
   res.json({ data: tasks })
-})
+}))
 
 // Get task stats
-router.get('/stats', authenticate, (req: AuthRequest, res: Response) => {
-  const stats = TaskModel.getStats(req.userId!)
+router.get('/stats', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const stats = await TaskModel.getStats(req.userId!)
   res.json({ data: stats })
-})
+}))
 
 // Get single task
-router.get('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const task = TaskModel.findById(req.params.id, req.userId!)
+router.get('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const task = await TaskModel.findById(req.params.id, req.userId!)
   if (!task) {
     throw new AppError('Task not found', 404)
   }
   res.json({ data: task })
-})
+}))
 
 // Create task
-router.post('/', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = createTaskSchema.parse(req.body)
-  const task = TaskModel.create({
+  const task = await TaskModel.create({
     user_id: req.userId!,
     title: data.title,
     description: data.description,
@@ -68,12 +68,12 @@ router.post('/', authenticate, (req: AuthRequest, res: Response) => {
     goal_id: data.goalId,
   })
   res.status(201).json({ data: task })
-})
+}))
 
 // Update task
-router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
+router.put('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = updateTaskSchema.parse(req.body)
-  const task = TaskModel.update(req.params.id, req.userId!, {
+  const task = await TaskModel.update(req.params.id, req.userId!, {
     title: data.title,
     description: data.description,
     status: data.status,
@@ -88,15 +88,15 @@ router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
     throw new AppError('Task not found', 404)
   }
   res.json({ data: task })
-})
+}))
 
 // Delete task
-router.delete('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const deleted = TaskModel.delete(req.params.id, req.userId!)
+router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const deleted = await TaskModel.delete(req.params.id, req.userId!)
   if (!deleted) {
     throw new AppError('Task not found', 404)
   }
   res.json({ success: true })
-})
+}))
 
 export { router as taskRoutes }

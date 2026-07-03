@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { FocusSessionModel } from '../models/focusSession'
 import { AppError } from '../middleware/errorHandler'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 
@@ -13,41 +14,41 @@ const createSessionSchema = z.object({
 })
 
 // Get recent sessions
-router.get('/', authenticate, (req: AuthRequest, res: Response) => {
+router.get('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 50
-  const sessions = FocusSessionModel.findAll(req.userId!, limit)
+  const sessions = await FocusSessionModel.findAll(req.userId!, limit)
   res.json({ data: sessions })
-})
+}))
 
 // Get today's sessions
-router.get('/today', authenticate, (req: AuthRequest, res: Response) => {
-  const sessions = FocusSessionModel.findToday(req.userId!)
+router.get('/today', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const sessions = await FocusSessionModel.findToday(req.userId!)
   res.json({ data: sessions })
-})
+}))
 
 // Get focus stats
-router.get('/stats', authenticate, (req: AuthRequest, res: Response) => {
-  const stats = FocusSessionModel.getStats(req.userId!)
+router.get('/stats', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const stats = await FocusSessionModel.getStats(req.userId!)
   res.json({ data: stats })
-})
+}))
 
 // Start a new session
-router.post('/', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = createSessionSchema.parse(req.body)
-  const session = FocusSessionModel.create({
+  const session = await FocusSessionModel.create({
     user_id: req.userId!,
     task_id: data.taskId,
     duration: data.duration,
     type: data.type,
   })
   res.status(201).json({ data: session })
-})
+}))
 
 // Complete a session
-router.post('/:id/complete', authenticate, (req: AuthRequest, res: Response) => {
-  const session = FocusSessionModel.complete(req.params.id, req.userId!)
+router.post('/:id/complete', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const session = await FocusSessionModel.complete(req.params.id, req.userId!)
   if (!session) throw new AppError('Session not found', 404)
   res.json({ data: session })
-})
+}))
 
 export { router as focusSessionRoutes }

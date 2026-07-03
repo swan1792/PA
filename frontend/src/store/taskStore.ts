@@ -9,7 +9,6 @@ interface TaskState {
   fetchTasks: () => Promise<void>
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>
-  fetchTasks: () => Promise<void>
   deleteTask: (id: string) => Promise<void>
 }
 

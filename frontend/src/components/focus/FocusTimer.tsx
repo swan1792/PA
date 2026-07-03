@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useFocusStore } from '../../store/focusStore'
 import Card from '../ui/Card'
 import Button from '../ui/Button'

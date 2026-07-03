@@ -1,4 +1,4 @@
-import { getDB, saveDB } from '../db'
+import { getDB } from '../db'
 
 export interface Goal {
   id: string
@@ -12,84 +12,60 @@ export interface Goal {
   updated_at: string
 }
 
-function mapRow(stmt: any): Goal | null {
-  if (stmt.step()) {
-    const values = stmt.get()
-    stmt.free()
-    return {
-      id: values[0] as string,
-      user_id: values[1] as string,
-      title: values[2] as string,
-      description: values[3] as string | null,
-      target_date: values[4] as string | null,
-      status: values[5] as Goal['status'],
-      progress: values[6] as number,
-      created_at: values[7] as string,
-      updated_at: values[8] as string,
-    }
+function mapGoal(row: any): Goal {
+  return {
+    id: row.id as string,
+    user_id: row.user_id as string,
+    title: row.title as string,
+    description: row.description as string | null,
+    target_date: row.target_date as string | null,
+    status: row.status as Goal['status'],
+    progress: row.progress as number,
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
   }
-  stmt.free()
-  return null
-}
-
-function mapRows(stmt: any): Goal[] {
-  const results: Goal[] = []
-  while (stmt.step()) {
-    const values = stmt.get()
-    results.push({
-      id: values[0] as string,
-      user_id: values[1] as string,
-      title: values[2] as string,
-      description: values[3] as string | null,
-      target_date: values[4] as string | null,
-      status: values[5] as Goal['status'],
-      progress: values[6] as number,
-      created_at: values[7] as string,
-      updated_at: values[8] as string,
-    })
-  }
-  stmt.free()
-  return results
 }
 
 export const GoalModel = {
-  findAll(userId: string): Goal[] {
-    const db = getDB()
-    const stmt = db.prepare('SELECT * FROM goals WHERE user_id = ? ORDER BY created_at DESC')
-    stmt.bind([userId])
-    return mapRows(stmt)
+  async findAll(userId: string): Promise<Goal[]> {
+    const result = await getDB().execute({
+      sql: 'SELECT * FROM goals WHERE user_id = ? ORDER BY created_at DESC',
+      args: [userId]
+    })
+    return result.rows.map(mapGoal)
   },
 
-  findById(id: string, userId: string): Goal | undefined {
-    const db = getDB()
-    const stmt = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?')
-    stmt.bind([id, userId])
-    return mapRow(stmt) || undefined
+  async findById(id: string, userId: string): Promise<Goal | undefined> {
+    const result = await getDB().execute({
+      sql: 'SELECT * FROM goals WHERE id = ? AND user_id = ?',
+      args: [id, userId]
+    })
+    if (result.rows.length === 0) return undefined
+    return mapGoal(result.rows[0])
   },
 
-  create(data: {
+  async create(data: {
     user_id: string
     title: string
     description?: string
     target_date?: string
-  }): Goal {
+  }): Promise<Goal> {
     const db = getDB()
     const id = crypto.randomUUID()
-    db.run(
-      'INSERT INTO goals (id, user_id, title, description, target_date) VALUES (?, ?, ?, ?, ?)',
-      [id, data.user_id, data.title, data.description || null, data.target_date || null]
-    )
-    saveDB()
-    return this.findById(id, data.user_id)!
+    await db.execute({
+      sql: 'INSERT INTO goals (id, user_id, title, description, target_date) VALUES (?, ?, ?, ?, ?)',
+      args: [id, data.user_id, data.title, data.description || null, data.target_date || null]
+    })
+    return (await this.findById(id, data.user_id))!
   },
 
-  update(id: string, userId: string, data: {
+  async update(id: string, userId: string, data: {
     title?: string
     description?: string
     target_date?: string | null
     status?: 'active' | 'completed' | 'abandoned'
     progress?: number
-  }): Goal | undefined {
+  }): Promise<Goal | undefined> {
     const db = getDB()
     const updates: string[] = []
     const values: any[] = []
@@ -103,52 +79,37 @@ export const GoalModel = {
     if (updates.length === 0) return this.findById(id, userId)
 
     values.push(id, userId)
-    db.run(`UPDATE goals SET ${updates.join(', ')}, updated_at = datetime('now') WHERE id = ? AND user_id = ?`, values)
-    saveDB()
+    await db.execute({ sql: `UPDATE goals SET ${updates.join(', ')}, updated_at = datetime('now') WHERE id = ? AND user_id = ?`, args: values })
     return this.findById(id, userId)
   },
 
-  delete(id: string, userId: string): boolean {
+  async delete(id: string, userId: string): Promise<boolean> {
     const db = getDB()
-    db.run('UPDATE tasks SET goal_id = NULL WHERE goal_id = ? AND user_id = ?', [id, userId])
-    db.run('UPDATE habits SET goal_id = NULL WHERE goal_id = ? AND user_id = ?', [id, userId])
-    db.run('DELETE FROM goals WHERE id = ? AND user_id = ?', [id, userId])
-    saveDB()
+    await db.execute({ sql: 'UPDATE tasks SET goal_id = NULL WHERE goal_id = ? AND user_id = ?', args: [id, userId] })
+    await db.execute({ sql: 'UPDATE habits SET goal_id = NULL WHERE goal_id = ? AND user_id = ?', args: [id, userId] })
+    await db.execute({ sql: 'DELETE FROM goals WHERE id = ? AND user_id = ?', args: [id, userId] })
     return true
   },
 
-  getWithStats(userId: string) {
-    const goals = this.findAll(userId)
+  async getWithStats(userId: string) {
+    const goals = await this.findAll(userId)
     const db = getDB()
 
-    return goals.map((goal) => {
-      // Count linked tasks
-      const taskStmt = db.prepare(`
-        SELECT
-          COUNT(*) as total,
-          SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed
-        FROM tasks WHERE goal_id = ? AND user_id = ?
-      `)
-      taskStmt.bind([goal.id, userId])
-      let totalTasks = 0
-      let completedTasks = 0
-      if (taskStmt.step()) {
-        const vals = taskStmt.get()
-        totalTasks = (vals[0] as number) || 0
-        completedTasks = (vals[1] as number) || 0
-      }
-      taskStmt.free()
+    return Promise.all(goals.map(async (goal) => {
+      const taskResult = await db.execute({
+        sql: `SELECT COUNT(*) as total, SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as completed
+          FROM tasks WHERE goal_id = ? AND user_id = ?`,
+        args: [goal.id, userId]
+      })
+      const totalTasks = Number(taskResult.rows[0]?.total) || 0
+      const completedTasks = Number(taskResult.rows[0]?.completed) || 0
 
-      // Count linked habits
-      const habitStmt = db.prepare('SELECT COUNT(*) FROM habits WHERE goal_id = ? AND user_id = ?')
-      habitStmt.bind([goal.id, userId])
-      let totalHabits = 0
-      if (habitStmt.step()) {
-        totalHabits = habitStmt.get()[0] as number
-      }
-      habitStmt.free()
+      const habitResult = await db.execute({
+        sql: 'SELECT COUNT(*) as count FROM habits WHERE goal_id = ? AND user_id = ?',
+        args: [goal.id, userId]
+      })
+      const totalHabits = Number(habitResult.rows[0]?.count) || 0
 
-      // Auto-calculate progress if tasks are linked
       const autoProgress = totalTasks > 0
         ? Math.round((completedTasks / totalTasks) * 100)
         : goal.progress
@@ -158,6 +119,6 @@ export const GoalModel = {
         progress: autoProgress,
         stats: { totalTasks, completedTasks, totalHabits },
       }
-    })
+    }))
   },
 }

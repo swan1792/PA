@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { CategoryModel } from '../models/category'
 import { AppError } from '../middleware/errorHandler'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 
@@ -19,36 +20,36 @@ const updateCategorySchema = z.object({
 })
 
 // Get all categories
-router.get('/', authenticate, (req: AuthRequest, res: Response) => {
-  const categories = CategoryModel.findAll(req.userId!)
+router.get('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const categories = await CategoryModel.findAll(req.userId!)
   res.json({ data: categories })
-})
+}))
 
 // Create category
-router.post('/', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = createCategorySchema.parse(req.body)
-  const category = CategoryModel.create({
+  const category = await CategoryModel.create({
     user_id: req.userId!,
     name: data.name,
     color: data.color,
     icon: data.icon,
   })
   res.status(201).json({ data: category })
-})
+}))
 
 // Update category
-router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
+router.put('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = updateCategorySchema.parse(req.body)
-  const category = CategoryModel.update(req.params.id, req.userId!, data)
+  const category = await CategoryModel.update(req.params.id, req.userId!, data)
   if (!category) throw new AppError('Category not found', 404)
   res.json({ data: category })
-})
+}))
 
 // Delete category
-router.delete('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const deleted = CategoryModel.delete(req.params.id, req.userId!)
+router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const deleted = await CategoryModel.delete(req.params.id, req.userId!)
   if (!deleted) throw new AppError('Category not found', 404)
   res.json({ success: true })
-})
+}))
 
 export { router as categoryRoutes }

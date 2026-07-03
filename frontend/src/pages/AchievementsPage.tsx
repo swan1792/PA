@@ -4,7 +4,7 @@ import Layout from '../components/layout/Layout'
 import Card from '../components/ui/Card'
 
 export default function AchievementsPage() {
-  const { achievements, fetchAchievements, checkAchievements, isLoading } = useAchievementStore()
+  const { achievements, fetchAchievements, checkAchievements } = useAchievementStore()
 
   useEffect(() => { fetchAchievements(); checkAchievements() }, [])
 

@@ -3,30 +3,39 @@ import { z } from 'zod'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { WorkoutModel } from '../models/workout'
 import { AppError } from '../middleware/errorHandler'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 const createWorkoutSchema = z.object({ name: z.string().min(1), type: z.string().optional(), duration: z.number().optional(), notes: z.string().optional(), date: z.string() })
 const addSetSchema = z.object({ exercise: z.string().min(1), reps: z.number().optional(), weight: z.number().optional(), duration: z.number().optional() })
 
-router.get('/', authenticate, (req: AuthRequest, res: Response) => { res.json({ data: WorkoutModel.findAll(req.userId!) }) })
-router.get('/stats', authenticate, (req: AuthRequest, res: Response) => { res.json({ data: WorkoutModel.getStats(req.userId!) }) })
-router.get('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const w = WorkoutModel.findById(req.params.id, req.userId!)
+router.get('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const workouts = await WorkoutModel.findAll(req.userId!)
+  res.json({ data: workouts })
+}))
+router.get('/stats', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const stats = await WorkoutModel.getStats(req.userId!)
+  res.json({ data: stats })
+}))
+router.get('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const w = await WorkoutModel.findById(req.params.id, req.userId!)
   if (!w) throw new AppError('Workout not found', 404)
-  const sets = WorkoutModel.getSets(req.params.id)
+  const sets = await WorkoutModel.getSets(req.params.id)
   res.json({ data: { ...w, sets } })
-})
-router.post('/', authenticate, (req: AuthRequest, res: Response) => {
+}))
+router.post('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = createWorkoutSchema.parse(req.body)
-  res.status(201).json({ data: WorkoutModel.create({ user_id: req.userId!, ...data }) })
-})
-router.post('/:id/sets', authenticate, (req: AuthRequest, res: Response) => {
+  const workout = await WorkoutModel.create({ user_id: req.userId!, ...data })
+  res.status(201).json({ data: workout })
+}))
+router.post('/:id/sets', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = addSetSchema.parse(req.body)
-  res.json({ data: WorkoutModel.addSet(req.params.id, data) })
-})
-router.delete('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  WorkoutModel.delete(req.params.id, req.userId!)
+  const set = await WorkoutModel.addSet(req.params.id, data)
+  res.json({ data: set })
+}))
+router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  await WorkoutModel.delete(req.params.id, req.userId!)
   res.json({ success: true })
-})
+}))
 
 export { router as workoutRoutes }

@@ -1,11 +1,12 @@
 import { Router, Response } from 'express'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { UserModel } from '../models/user'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 
-router.get('/me', authenticate, (req: AuthRequest, res: Response) => {
-  const user = UserModel.findById(req.userId!)
+router.get('/me', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = await UserModel.findById(req.userId!)
 
   if (!user) {
     return res.status(404).json({ error: 'User not found' })
@@ -19,6 +20,6 @@ router.get('/me', authenticate, (req: AuthRequest, res: Response) => {
       createdAt: user.created_at,
     },
   })
-})
+}))
 
 export { router as userRoutes }

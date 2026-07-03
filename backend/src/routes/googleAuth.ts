@@ -30,18 +30,18 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // Check if user exists
-    let user = UserModel.findByEmail(googleUser.email)
+    let user = await UserModel.findByEmail(googleUser.email)
 
     if (!user) {
       // Create new user
       const userId = crypto.randomUUID()
-      UserModel.create({
+      await UserModel.create({
         id: userId,
         email: googleUser.email,
         name: googleUser.name,
         password_hash: '', // No password for Google users
       })
-      user = UserModel.findByEmail(googleUser.email)
+      user = await UserModel.findByEmail(googleUser.email)
     }
 
     // Generate app token
@@ -81,18 +81,18 @@ router.post('/web', async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // Check if user exists
-    let user = UserModel.findByEmail(googleUser.email)
+    let user = await UserModel.findByEmail(googleUser.email)
 
     if (!user) {
       // Create new user
       const userId = crypto.randomUUID()
-      UserModel.create({
+      await UserModel.create({
         id: userId,
         email: googleUser.email,
         name: googleUser.name,
         password_hash: '', // No password for Google users
       })
-      user = UserModel.findByEmail(googleUser.email)
+      user = await UserModel.findByEmail(googleUser.email)
     }
 
     // Generate app token

@@ -1,13 +1,12 @@
-import { getDB, saveDB } from '../db'
+import { getDB } from '../db'
 
 export interface Achievement { id: string; name: string; description: string; icon: string; condition_type: string; condition_value: number; created_at: string }
 export interface UserAchievement { id: string; user_id: string; achievement_id: string; earned_at: string }
 
-// Seed default achievements
-export function seedAchievements() {
+export async function seedAchievements() {
   const db = getDB()
-  const count = db.exec('SELECT COUNT(*) FROM achievements')
-  if (count[0]?.values[0]?.[0] > 0) return
+  const countResult = await db.execute('SELECT COUNT(*) as count FROM achievements')
+  if (Number(countResult.rows[0]?.count) > 0) return
 
   const achievements = [
     { name: 'First Step', desc: 'Complete your first task', icon: '👣', type: 'tasks_completed', value: 1 },
@@ -27,71 +26,80 @@ export function seedAchievements() {
     { name: 'Mood Tracker', desc: 'Log mood for 7 days', icon: '😊', type: 'mood_entries', value: 7 },
   ]
 
-  achievements.forEach(a => {
-    db.run('INSERT INTO achievements (id, name, description, icon, condition_type, condition_value) VALUES (?, ?, ?, ?, ?, ?)',
-      [crypto.randomUUID(), a.name, a.desc, a.icon, a.type, a.value])
-  })
-  saveDB()
+  for (const a of achievements) {
+    await db.execute({
+      sql: 'INSERT INTO achievements (id, name, description, icon, condition_type, condition_value) VALUES (?, ?, ?, ?, ?, ?)',
+      args: [crypto.randomUUID(), a.name, a.desc, a.icon, a.type, a.value]
+    })
+  }
 }
 
 export const AchievementModel = {
-  getAll(): Achievement[] {
-    const stmt = getDB().prepare('SELECT * FROM achievements ORDER BY condition_value')
-    const results: Achievement[] = []
-    while (stmt.step()) { const v = stmt.get(); results.push({ id: v[0], name: v[1], description: v[2], icon: v[3], condition_type: v[4], condition_value: v[5], created_at: v[6] }) }
-    stmt.free()
-    return results
+  async getAll(): Promise<Achievement[]> {
+    const result = await getDB().execute('SELECT * FROM achievements ORDER BY condition_value')
+    return result.rows.map(row => ({
+      id: row.id as string,
+      name: row.name as string,
+      description: row.description as string,
+      icon: row.icon as string,
+      condition_type: row.condition_type as string,
+      condition_value: row.condition_value as number,
+      created_at: row.created_at as string,
+    }))
   },
 
-  getUserAchievements(userId: string): Achievement[] {
-    const stmt = getDB().prepare('SELECT a.* FROM achievements a JOIN user_achievements ua ON a.id = ua.achievement_id WHERE ua.user_id = ? ORDER BY ua.earned_at DESC')
-    stmt.bind([userId])
-    const results: Achievement[] = []
-    while (stmt.step()) { const v = stmt.get(); results.push({ id: v[0], name: v[1], description: v[2], icon: v[3], condition_type: v[4], condition_value: v[5], created_at: v[6] }) }
-    stmt.free()
-    return results
+  async getUserAchievements(userId: string): Promise<Achievement[]> {
+    const result = await getDB().execute({
+      sql: 'SELECT a.* FROM achievements a JOIN user_achievements ua ON a.id = ua.achievement_id WHERE ua.user_id = ? ORDER BY ua.earned_at DESC',
+      args: [userId]
+    })
+    return result.rows.map(row => ({
+      id: row.id as string,
+      name: row.name as string,
+      description: row.description as string,
+      icon: row.icon as string,
+      condition_type: row.condition_type as string,
+      condition_value: row.condition_value as number,
+      created_at: row.created_at as string,
+    }))
   },
 
-  checkAndAward(userId: string) {
+  async checkAndAward(userId: string): Promise<Achievement[]> {
     const db = getDB()
-    const allAchievements = this.getAll()
-    const earned = new Set(this.getUserAchievements(userId).map(a => a.id))
+    const allAchievements = await this.getAll()
+    const earned = new Set((await this.getUserAchievements(userId)).map(a => a.id))
     const newlyEarned: Achievement[] = []
 
-    // Count user stats
-    const countQuery = (sql: string, params: any[]): number => {
-      const stmt = db.prepare(sql)
-      stmt.bind(params)
-      let count = 0
-      if (stmt.step()) count = (stmt.get()[0] as number) || 0
-      stmt.free()
-      return count
+    const countQuery = async (sql: string, params: any[]): Promise<number> => {
+      const result = await db.execute({ sql, args: params })
+      return Number(result.rows[0]?.[Object.keys(result.rows[0])[0]]) || 0
     }
 
     const stats = {
-      tasks_completed: countQuery('SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = ?', [userId, 'done']),
-      focus_sessions: countQuery('SELECT COUNT(*) FROM focus_sessions WHERE user_id = ? AND completed = 1', [userId]),
-      goals_created: countQuery('SELECT COUNT(*) FROM goals WHERE user_id = ?', [userId]),
-      goals_completed: countQuery('SELECT COUNT(*) FROM goals WHERE user_id = ? AND status = ?', [userId, 'completed']),
-      journal_entries: countQuery('SELECT COUNT(*) FROM journals WHERE user_id = ?', [userId]),
-      reading_items: countQuery('SELECT COUNT(*) FROM reading_list WHERE user_id = ?', [userId]),
-      workouts_logged: countQuery('SELECT COUNT(*) FROM workouts WHERE user_id = ?', [userId]),
-      expenses_tracked: countQuery('SELECT COUNT(*) FROM expenses WHERE user_id = ?', [userId]),
-      mood_entries: countQuery('SELECT COUNT(*) FROM moods WHERE user_id = ?', [userId]),
-      habit_streak: 0, // Simplified
+      tasks_completed: await countQuery('SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = ?', [userId, 'done']),
+      focus_sessions: await countQuery('SELECT COUNT(*) FROM focus_sessions WHERE user_id = ? AND completed = 1', [userId]),
+      goals_created: await countQuery('SELECT COUNT(*) FROM goals WHERE user_id = ?', [userId]),
+      goals_completed: await countQuery('SELECT COUNT(*) FROM goals WHERE user_id = ? AND status = ?', [userId, 'completed']),
+      journal_entries: await countQuery('SELECT COUNT(*) FROM journals WHERE user_id = ?', [userId]),
+      reading_items: await countQuery('SELECT COUNT(*) FROM reading_list WHERE user_id = ?', [userId]),
+      workouts_logged: await countQuery('SELECT COUNT(*) FROM workouts WHERE user_id = ?', [userId]),
+      expenses_tracked: await countQuery('SELECT COUNT(*) FROM expenses WHERE user_id = ?', [userId]),
+      mood_entries: await countQuery('SELECT COUNT(*) FROM moods WHERE user_id = ?', [userId]),
+      habit_streak: 0,
     }
 
-    allAchievements.forEach(achievement => {
-      if (earned.has(achievement.id)) return
+    for (const achievement of allAchievements) {
+      if (earned.has(achievement.id)) continue
       const current = stats[achievement.condition_type as keyof typeof stats] || 0
       if (current >= achievement.condition_value) {
-        db.run('INSERT OR IGNORE INTO user_achievements (id, user_id, achievement_id) VALUES (?, ?, ?)',
-          [crypto.randomUUID(), userId, achievement.id])
+        await db.execute({
+          sql: 'INSERT OR IGNORE INTO user_achievements (id, user_id, achievement_id) VALUES (?, ?, ?)',
+          args: [crypto.randomUUID(), userId, achievement.id]
+        })
         newlyEarned.push(achievement)
       }
-    })
+    }
 
-    if (newlyEarned.length > 0) saveDB()
     return newlyEarned
   },
 }
