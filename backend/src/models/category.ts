@@ -1,4 +1,4 @@
-import { getDB, saveDB } from '../db'
+import { getDB } from '../db'
 
 export interface Category {
   id: string
@@ -9,67 +9,50 @@ export interface Category {
   created_at: string
 }
 
-function mapRow(stmt: any): Category | null {
-  if (stmt.step()) {
-    const values = stmt.get()
-    stmt.free()
-    return {
-      id: values[0] as string,
-      user_id: values[1] as string,
-      name: values[2] as string,
-      color: values[3] as string,
-      icon: values[4] as string,
-      created_at: values[5] as string,
-    }
-  }
-  stmt.free()
-  return null
-}
-
-function mapRows(stmt: any): Category[] {
-  const results: Category[] = []
-  while (stmt.step()) {
-    const values = stmt.get()
-    results.push({
-      id: values[0] as string,
-      user_id: values[1] as string,
-      name: values[2] as string,
-      color: values[3] as string,
-      icon: values[4] as string,
-      created_at: values[5] as string,
-    })
-  }
-  stmt.free()
-  return results
-}
-
 export const CategoryModel = {
-  findAll(userId: string): Category[] {
-    const db = getDB()
-    const stmt = db.prepare('SELECT * FROM categories WHERE user_id = ? ORDER BY name')
-    stmt.bind([userId])
-    return mapRows(stmt)
+  async findAll(userId: string): Promise<Category[]> {
+    const result = await getDB().execute({
+      sql: 'SELECT * FROM categories WHERE user_id = ? ORDER BY name',
+      args: [userId]
+    })
+    return result.rows.map(row => ({
+      id: row.id as string,
+      user_id: row.user_id as string,
+      name: row.name as string,
+      color: row.color as string,
+      icon: row.icon as string,
+      created_at: row.created_at as string,
+    }))
   },
 
-  findById(id: string, userId: string): Category | undefined {
-    const db = getDB()
-    const stmt = db.prepare('SELECT * FROM categories WHERE id = ? AND user_id = ?')
-    stmt.bind([id, userId])
-    return mapRow(stmt) || undefined
+  async findById(id: string, userId: string): Promise<Category | undefined> {
+    const result = await getDB().execute({
+      sql: 'SELECT * FROM categories WHERE id = ? AND user_id = ?',
+      args: [id, userId]
+    })
+    if (result.rows.length === 0) return undefined
+    const row = result.rows[0]
+    return {
+      id: row.id as string,
+      user_id: row.user_id as string,
+      name: row.name as string,
+      color: row.color as string,
+      icon: row.icon as string,
+      created_at: row.created_at as string,
+    }
   },
 
-  create(data: { user_id: string; name: string; color?: string; icon?: string }): Category {
+  async create(data: { user_id: string; name: string; color?: string; icon?: string }): Promise<Category> {
     const db = getDB()
     const id = crypto.randomUUID()
-    db.run(
-      'INSERT INTO categories (id, user_id, name, color, icon) VALUES (?, ?, ?, ?, ?)',
-      [id, data.user_id, data.name, data.color || '#7c3aed', data.icon || '📁']
-    )
-    saveDB()
-    return this.findById(id, data.user_id)!
+    await db.execute({
+      sql: 'INSERT INTO categories (id, user_id, name, color, icon) VALUES (?, ?, ?, ?, ?)',
+      args: [id, data.user_id, data.name, data.color || '#7c3aed', data.icon || '📁']
+    })
+    return (await this.findById(id, data.user_id))!
   },
 
-  update(id: string, userId: string, data: { name?: string; color?: string; icon?: string }): Category | undefined {
+  async update(id: string, userId: string, data: { name?: string; color?: string; icon?: string }): Promise<Category | undefined> {
     const db = getDB()
     const updates: string[] = []
     const values: any[] = []
@@ -81,17 +64,14 @@ export const CategoryModel = {
     if (updates.length === 0) return this.findById(id, userId)
 
     values.push(id, userId)
-    db.run(`UPDATE categories SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`, values)
-    saveDB()
+    await db.execute({ sql: `UPDATE categories SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`, args: values })
     return this.findById(id, userId)
   },
 
-  delete(id: string, userId: string): boolean {
+  async delete(id: string, userId: string): Promise<boolean> {
     const db = getDB()
-    // Unlink tasks from this category first
-    db.run('UPDATE tasks SET category_id = NULL WHERE category_id = ? AND user_id = ?', [id, userId])
-    db.run('DELETE FROM categories WHERE id = ? AND user_id = ?', [id, userId])
-    saveDB()
+    await db.execute({ sql: 'UPDATE tasks SET category_id = NULL WHERE category_id = ? AND user_id = ?', args: [id, userId] })
+    await db.execute({ sql: 'DELETE FROM categories WHERE id = ? AND user_id = ?', args: [id, userId] })
     return true
   },
 }

@@ -86,11 +86,11 @@ app.get('/api/health', (req, res) => {
 // Error handling
 app.use(errorHandler)
 
-// Initialize database and start server
+// Initialize database and start server (only when run directly, not when imported)
 async function start() {
   try {
     await initDB()
-    seedAchievements()
+    await seedAchievements()
     console.log('Database initialized')
 
     app.listen(PORT, () => {
@@ -102,6 +102,9 @@ async function start() {
   }
 }
 
-start()
+// Only start if this file is the main entry point (not when imported as a module)
+if (require.main === module) {
+  start()
+}
 
 export default app

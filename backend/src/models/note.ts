@@ -1,4 +1,4 @@
-import { getDB, saveDB } from '../db'
+import { getDB } from '../db'
 
 export interface Note {
   id: string
@@ -8,47 +8,40 @@ export interface Note {
   updated_at: string
 }
 
-function mapRow(stmt: any): Note | null {
-  if (stmt.step()) {
-    const values = stmt.get()
-    stmt.free()
-    return {
-      id: values[0] as string,
-      user_id: values[1] as string,
-      content: values[2] as string,
-      created_at: values[3] as string,
-      updated_at: values[4] as string,
-    }
-  }
-  stmt.free()
-  return null
-}
-
 export const NoteModel = {
-  findByUserId(userId: string): Note | undefined {
+  async findByUserId(userId: string): Promise<Note | undefined> {
     const db = getDB()
-    const stmt = db.prepare('SELECT * FROM notes WHERE user_id = ?')
-    stmt.bind([userId])
-    return mapRow(stmt) || undefined
+    const result = await db.execute({
+      sql: 'SELECT * FROM notes WHERE user_id = ?',
+      args: [userId]
+    })
+    if (result.rows.length === 0) return undefined
+    const row = result.rows[0]
+    return {
+      id: row.id as string,
+      user_id: row.user_id as string,
+      content: row.content as string,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+    }
   },
 
-  upsert(userId: string, content: string): Note {
+  async upsert(userId: string, content: string): Promise<Note> {
     const db = getDB()
-    const existing = this.findByUserId(userId)
+    const existing = await this.findByUserId(userId)
 
     if (existing) {
-      db.run(
-        "UPDATE notes SET content = ?, updated_at = datetime('now') WHERE user_id = ?",
-        [content, userId]
-      )
+      await db.execute({
+        sql: "UPDATE notes SET content = ?, updated_at = datetime('now') WHERE user_id = ?",
+        args: [content, userId]
+      })
     } else {
       const id = crypto.randomUUID()
-      db.run(
-        'INSERT INTO notes (id, user_id, content) VALUES (?, ?, ?)',
-        [id, userId, content]
-      )
+      await db.execute({
+        sql: 'INSERT INTO notes (id, user_id, content) VALUES (?, ?, ?)',
+        args: [id, userId, content]
+      })
     }
-    saveDB()
-    return this.findByUserId(userId)!
+    return (await this.findByUserId(userId))!
   },
 }

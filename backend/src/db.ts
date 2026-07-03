@@ -1,24 +1,22 @@
-import initSqlJs, { Database } from 'sql.js'
-import fs from 'fs'
-import path from 'path'
+import { createClient, Client } from '@libsql/client'
 
-const dbPath = path.join(__dirname, '..', 'data', 'app.db')
+let client: Client
 
-let db: Database
+export function getDB(): Client {
+  if (!client) {
+    client = createClient({
+      url: process.env.TURSO_DATABASE_URL!,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    })
+  }
+  return client
+}
 
 export async function initDB() {
-  const SQL = await initSqlJs()
-
-  // Load existing database or create new one
-  if (fs.existsSync(dbPath)) {
-    const buffer = fs.readFileSync(dbPath)
-    db = new SQL.Database(buffer)
-  } else {
-    db = new SQL.Database()
-  }
+  const db = getDB()
 
   // Create tables
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
@@ -29,7 +27,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS tasks (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -44,7 +42,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS habits (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -58,7 +56,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS habit_completions (
       id TEXT PRIMARY KEY,
       habit_id TEXT NOT NULL,
@@ -69,7 +67,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS notes (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL UNIQUE,
@@ -80,7 +78,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -92,7 +90,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS goals (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -107,7 +105,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS moods (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -121,7 +119,7 @@ export async function initDB() {
     )
   `)
 
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS focus_sessions (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -136,8 +134,7 @@ export async function initDB() {
     )
   `)
 
-  // Journal entries
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS journals (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -151,8 +148,7 @@ export async function initDB() {
     )
   `)
 
-  // Tags
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS tags (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -163,8 +159,7 @@ export async function initDB() {
     )
   `)
 
-  // Task-Tag many-to-many
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS task_tags (
       task_id TEXT NOT NULL,
       tag_id TEXT NOT NULL,
@@ -174,8 +169,7 @@ export async function initDB() {
     )
   `)
 
-  // Idea board (sticky notes)
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS ideas (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -189,8 +183,7 @@ export async function initDB() {
     )
   `)
 
-  // Reading list
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS reading_list (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -203,8 +196,7 @@ export async function initDB() {
     )
   `)
 
-  // Workouts
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS workouts (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -218,8 +210,7 @@ export async function initDB() {
     )
   `)
 
-  // Workout sets
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS workout_sets (
       id TEXT PRIMARY KEY,
       workout_id TEXT NOT NULL,
@@ -232,8 +223,7 @@ export async function initDB() {
     )
   `)
 
-  // Expenses
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS expenses (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -246,8 +236,7 @@ export async function initDB() {
     )
   `)
 
-  // Achievements (badge definitions)
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS achievements (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -259,8 +248,7 @@ export async function initDB() {
     )
   `)
 
-  // User achievements (earned badges)
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS user_achievements (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -272,8 +260,7 @@ export async function initDB() {
     )
   `)
 
-  // Reminders
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS reminders (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
@@ -286,8 +273,7 @@ export async function initDB() {
     )
   `)
 
-  // User settings (theme, PIN, preferences)
-  db.run(`
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS user_settings (
       user_id TEXT PRIMARY KEY,
       theme TEXT DEFAULT 'system',
@@ -300,31 +286,24 @@ export async function initDB() {
   `)
 
   // Add new columns to existing tables (safe with IF NOT EXISTS equivalent)
-  try { db.run("ALTER TABLE tasks ADD COLUMN category_id TEXT") } catch {}
-  try { db.run("ALTER TABLE tasks ADD COLUMN recurrence TEXT DEFAULT 'none'") } catch {}
-  try { db.run("ALTER TABLE tasks ADD COLUMN recurrence_end_date TEXT") } catch {}
-  try { db.run("ALTER TABLE tasks ADD COLUMN parent_task_id TEXT") } catch {}
-  try { db.run("ALTER TABLE tasks ADD COLUMN goal_id TEXT") } catch {}
-  try { db.run("ALTER TABLE habits ADD COLUMN goal_id TEXT") } catch {}
+  const alterStatements = [
+    "ALTER TABLE tasks ADD COLUMN category_id TEXT",
+    "ALTER TABLE tasks ADD COLUMN recurrence TEXT DEFAULT 'none'",
+    "ALTER TABLE tasks ADD COLUMN recurrence_end_date TEXT",
+    "ALTER TABLE tasks ADD COLUMN parent_task_id TEXT",
+    "ALTER TABLE tasks ADD COLUMN goal_id TEXT",
+    "ALTER TABLE habits ADD COLUMN goal_id TEXT",
+  ]
 
-  saveDB()
-  return db
-}
-
-export function saveDB() {
-  if (db) {
-    const data = db.export()
-    const buffer = Buffer.from(data)
-    const dir = path.dirname(dbPath)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
+  for (const sql of alterStatements) {
+    try {
+      await db.execute(sql)
+    } catch {
+      // Column already exists, ignore
     }
-    fs.writeFileSync(dbPath, buffer)
   }
-}
 
-export function getDB() {
   return db
 }
 
-export default { initDB, getDB, saveDB }
+export default { initDB, getDB }

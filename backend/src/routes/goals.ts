@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { GoalModel } from '../models/goal'
 import { AppError } from '../middleware/errorHandler'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 
@@ -21,34 +22,34 @@ const updateGoalSchema = z.object({
 })
 
 // Get all goals with stats
-router.get('/', authenticate, (req: AuthRequest, res: Response) => {
-  const goals = GoalModel.getWithStats(req.userId!)
+router.get('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const goals = await GoalModel.getWithStats(req.userId!)
   res.json({ data: goals })
-})
+}))
 
 // Get single goal
-router.get('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const goal = GoalModel.findById(req.params.id, req.userId!)
+router.get('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const goal = await GoalModel.findById(req.params.id, req.userId!)
   if (!goal) throw new AppError('Goal not found', 404)
   res.json({ data: goal })
-})
+}))
 
 // Create goal
-router.post('/', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = createGoalSchema.parse(req.body)
-  const goal = GoalModel.create({
+  const goal = await GoalModel.create({
     user_id: req.userId!,
     title: data.title,
     description: data.description,
     target_date: data.targetDate,
   })
   res.status(201).json({ data: goal })
-})
+}))
 
 // Update goal
-router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
+router.put('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = updateGoalSchema.parse(req.body)
-  const goal = GoalModel.update(req.params.id, req.userId!, {
+  const goal = await GoalModel.update(req.params.id, req.userId!, {
     title: data.title,
     description: data.description,
     target_date: data.targetDate,
@@ -57,13 +58,13 @@ router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
   })
   if (!goal) throw new AppError('Goal not found', 404)
   res.json({ data: goal })
-})
+}))
 
 // Delete goal
-router.delete('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const deleted = GoalModel.delete(req.params.id, req.userId!)
+router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const deleted = await GoalModel.delete(req.params.id, req.userId!)
   if (!deleted) throw new AppError('Goal not found', 404)
   res.json({ success: true })
-})
+}))
 
 export { router as goalRoutes }

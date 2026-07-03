@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { authenticate, AuthRequest } from '../middleware/auth'
 import { HabitModel } from '../models/habit'
 import { AppError } from '../middleware/errorHandler'
+import { asyncHandler } from '../utils/asyncHandler'
 
 const router = Router()
 
@@ -27,15 +28,15 @@ const toggleSchema = z.object({
 })
 
 // Get all habits (with last 7 days of completions)
-router.get('/', authenticate, (req: AuthRequest, res: Response) => {
-  const habits = HabitModel.findWithCompletions(req.userId!)
+router.get('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const habits = await HabitModel.findWithCompletions(req.userId!)
   res.json({ data: habits })
-})
+}))
 
 // Create habit
-router.post('/', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = createHabitSchema.parse(req.body)
-  const habit = HabitModel.create({
+  const habit = await HabitModel.create({
     user_id: req.userId!,
     name: data.name,
     frequency: data.frequency,
@@ -44,19 +45,19 @@ router.post('/', authenticate, (req: AuthRequest, res: Response) => {
     goal_id: data.goalId,
   })
   res.status(201).json({ data: habit })
-})
+}))
 
 // Toggle completion for a date
-router.post('/:id/toggle', authenticate, (req: AuthRequest, res: Response) => {
+router.post('/:id/toggle', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const { date } = toggleSchema.parse(req.body)
-  const result = HabitModel.toggleCompletion(req.params.id, req.userId!, date)
+  const result = await HabitModel.toggleCompletion(req.params.id, req.userId!, date)
   res.json({ data: result })
-})
+}))
 
 // Update habit
-router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
+router.put('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
   const data = updateHabitSchema.parse(req.body)
-  const habit = HabitModel.update(req.params.id, req.userId!, {
+  const habit = await HabitModel.update(req.params.id, req.userId!, {
     name: data.name,
     frequency: data.frequency,
     specific_days: data.specificDays,
@@ -67,15 +68,15 @@ router.put('/:id', authenticate, (req: AuthRequest, res: Response) => {
     throw new AppError('Habit not found', 404)
   }
   res.json({ data: habit })
-})
+}))
 
 // Delete habit
-router.delete('/:id', authenticate, (req: AuthRequest, res: Response) => {
-  const deleted = HabitModel.delete(req.params.id, req.userId!)
+router.delete('/:id', authenticate, asyncHandler(async (req: AuthRequest, res: Response) => {
+  const deleted = await HabitModel.delete(req.params.id, req.userId!)
   if (!deleted) {
     throw new AppError('Habit not found', 404)
   }
   res.json({ success: true })
-})
+}))
 
 export { router as habitRoutes }

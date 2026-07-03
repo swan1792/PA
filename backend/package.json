@@ -8,6 +8,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.4",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "axios": "^1.18.1",
     "bcryptjs": "^2.4.3",
