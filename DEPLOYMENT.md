@@ -419,7 +419,7 @@ If API requests return 401 after login:
 If you want to deploy the backend on a different Docker-compatible platform (Fly.io, Render, DigitalOcean App Platform, etc.):
 
 ```bash
-# Build the image
+# Build the image (run from repo root)
 docker build -t pa-app-backend -f backend/Dockerfile .
 
 # Run locally to test
