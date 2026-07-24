@@ -16,28 +16,28 @@ export default function TaskCard({ task, onStatusChange, onDelete }: TaskCardPro
   const statusOptions: Task['status'][] = ['todo', 'in_progress', 'done']
 
   return (
-    <Card hover className="relative">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
+    <Card hover>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className={clsx('font-medium text-gray-900 dark:text-white', task.status === 'done' && 'line-through text-gray-400')}>
+            <h3 className={clsx('text-sm font-medium', task.status === 'done' ? 'line-through text-neo-muted' : 'text-neo-text')}>
               {task.title}
             </h3>
             {category && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: category.color + '20', color: category.color }}>
+              <span className="text-xs px-2 py-0.5 rounded-pill font-medium" style={{ backgroundColor: category.color + '20', color: category.color }}>
                 {category.icon} {category.name}
               </span>
             )}
             {task.recurrence && task.recurrence !== 'none' && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+              <span className="text-xs px-2 py-0.5 rounded-pill bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
                 🔁 {task.recurrence}
               </span>
             )}
           </div>
           {task.description && (
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
+            <p className="mt-1 text-sm text-neo-textSecondary">{task.description}</p>
           )}
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-2.5 flex items-center gap-2">
             <Badge variant={task.status}>
               {task.status.replace('_', ' ')}
             </Badge>
@@ -45,17 +45,17 @@ export default function TaskCard({ task, onStatusChange, onDelete }: TaskCardPro
               {task.priority}
             </Badge>
             {task.dueDate && (
-              <span className={clsx('text-xs', task.dueDate < new Date().toISOString().split('T')[0] && task.status !== 'done' ? 'text-red-500 font-medium' : 'text-gray-500')}>
+              <span className={clsx('text-xs', task.dueDate < new Date().toISOString().split('T')[0] && task.status !== 'done' ? 'text-red-500 font-medium' : 'text-neo-muted')}>
                 Due: {new Date(task.dueDate).toLocaleDateString()}
               </span>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           <select
             value={task.status}
             onChange={(e) => onStatusChange(task.id, e.target.value as Task['status'])}
-            className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            className="text-xs border border-neo-border rounded-lg px-2 py-1.5 bg-white dark:bg-[#1c1c30] text-neo-text focus:outline-none focus:ring-1 focus:ring-neo-primary"
           >
             {statusOptions.map((s) => (
               <option key={s} value={s}>
@@ -65,10 +65,10 @@ export default function TaskCard({ task, onStatusChange, onDelete }: TaskCardPro
           </select>
           <button
             onClick={() => onDelete(task.id)}
-            className="text-red-500 hover:text-red-700 transition-colors p-1"
+            className="text-neo-muted hover:text-neo-danger transition-colors p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
             </svg>
           </button>
         </div>

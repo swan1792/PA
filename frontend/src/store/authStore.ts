@@ -10,7 +10,6 @@ interface AuthState {
   error: string | null
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
-  googleLogin: (idToken: string) => Promise<void>
   logout: () => void
   clearError: () => void
 }
@@ -67,31 +66,6 @@ export const useAuthStore = create<AuthState>((set) => ({
       })
     } catch (error: any) {
       const message = error.response?.data?.error || 'Registration failed'
-      set({ error: message, isLoading: false })
-      throw new Error(message)
-    }
-  },
-
-  googleLogin: async (idToken: string) => {
-    set({ isLoading: true, error: null })
-    try {
-      const response = await apiClient.post('/auth/google/web', { credential: idToken })
-      const { user, token } = response.data.data
-
-      localStorage.setItem('token', token)
-      set({
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          createdAt: new Date().toISOString(),
-        },
-        token,
-        isAuthenticated: true,
-        isLoading: false,
-      })
-    } catch (error: any) {
-      const message = error.response?.data?.error || 'Google login failed'
       set({ error: message, isLoading: false })
       throw new Error(message)
     }

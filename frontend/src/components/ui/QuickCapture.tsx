@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTaskStore } from '../../store/taskStore'
 import { useNotesStore } from '../../store/notesStore'
-import Modal from './Modal'
 import { clsx } from 'clsx'
 
 type CaptureMode = 'task' | 'thought'
@@ -46,83 +45,119 @@ export default function QuickCapture() {
     setIsOpen(false)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+    if (e.key === 'Escape') {
+      setIsOpen(false)
+    }
+  }
+
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Floating Action Button - Todoist inspired */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-brand-600 text-white shadow-lg hover:bg-brand-700 hover:shadow-xl transition-all hover:scale-105 flex items-center justify-center"
+        className="fixed bottom-5 right-5 z-40 w-12 h-12 rounded-full bg-neo-primary text-white shadow-lg hover:bg-neo-primaryHover hover:shadow-xl active:scale-95 transition-all flex items-center justify-center"
         title="Quick Capture (Ctrl+K)"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       </button>
 
-      {/* Modal */}
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Quick Capture" size="sm">
-        {/* Mode Tabs */}
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => setMode('task')}
-            className={clsx(
-              'flex-1 py-2 rounded-lg text-sm font-medium transition-colors',
-              mode === 'task' ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-            )}
-          >
-            📋 Task
-          </button>
-          <button
-            onClick={() => setMode('thought')}
-            className={clsx(
-              'flex-1 py-2 rounded-lg text-sm font-medium transition-colors',
-              mode === 'thought' ? 'bg-brand-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-            )}
-          >
-            💭 Thought
-          </button>
-        </div>
+      {/* Quick Capture Modal - clean, minimal */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/20 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false)
+          }}
+        >
+          <div className="w-full max-w-lg bg-white dark:bg-[#1c1c30] rounded-2xl shadow-modal animate-scale-in overflow-hidden border border-neo-border">
+            {/* Mode Tabs */}
+            <div className="flex border-b border-neo-border">
+              <button
+                onClick={() => setMode('task')}
+                className={clsx(
+                  'flex-1 py-3.5 text-sm font-medium transition-colors relative',
+                  mode === 'task' ? 'text-neo-primary' : 'text-neo-muted hover:text-neo-text'
+                )}
+              >
+                📋 Task
+                {mode === 'task' && (
+                  <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-neo-primary rounded-full" />
+                )}
+              </button>
+              <button
+                onClick={() => setMode('thought')}
+                className={clsx(
+                  'flex-1 py-3.5 text-sm font-medium transition-colors relative',
+                  mode === 'thought' ? 'text-neo-primary' : 'text-neo-muted hover:text-neo-text'
+                )}
+              >
+                💭 Thought
+                {mode === 'thought' && (
+                  <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-neo-primary rounded-full" />
+                )}
+              </button>
+            </div>
 
-        {mode === 'task' ? (
-          <div>
-            <input
-              ref={inputRef}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              placeholder="What needs to be done?"
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-base"
-            />
-            <p className="text-xs text-gray-400 mt-2">Press Enter to create</p>
-          </div>
-        ) : (
-          <div>
-            <textarea
-              value={thought}
-              onChange={(e) => setThought(e.target.value)}
-              placeholder="Capture a quick thought..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 resize-none text-base"
-            />
-            <p className="text-xs text-gray-400 mt-2">Ctrl+Enter to save</p>
-          </div>
-        )}
+            <div className="p-4">
+              {mode === 'task' ? (
+                <input
+                  ref={inputRef}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="What needs to be done?"
+                  className="w-full px-0 py-2 text-base border-none bg-transparent text-neo-text placeholder-neo-muted focus:outline-none focus:ring-0"
+                  autoFocus
+                />
+              ) : (
+                <textarea
+                  ref={inputRef as any}
+                  value={thought}
+                  onChange={(e) => setThought(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault()
+                      handleSubmit()
+                    }
+                    if (e.key === 'Escape') setIsOpen(false)
+                  }}
+                  placeholder="Capture a quick thought..."
+                  rows={4}
+                  className="w-full px-0 py-2 text-base border-none bg-transparent text-neo-text placeholder-neo-muted resize-none focus:outline-none focus:ring-0"
+                  autoFocus
+                />
+              )}
 
-        <div className="flex gap-3 justify-end mt-4">
-          <button
-            onClick={() => setIsOpen(false)}
-            className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 text-sm bg-brand-600 text-white rounded-lg hover:bg-brand-700"
-          >
-            {mode === 'task' ? 'Create Task' : 'Save Thought'}
-          </button>
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-neo-border">
+                <span className="text-xs text-neo-muted">
+                  {mode === 'task' ? 'Enter to add' : 'Ctrl+Enter to save'}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="px-3.5 py-1.5 text-sm text-neo-textSecondary hover:text-neo-text bg-transparent rounded-lg hover:bg-gray-100 dark:hover:bg-[#2a2a40] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="px-4 py-1.5 text-sm font-medium bg-neo-primary text-white rounded-lg hover:bg-neo-primaryHover transition-colors"
+                  >
+                    {mode === 'task' ? 'Add Task' : 'Save'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </Modal>
+      )}
     </>
   )
 }

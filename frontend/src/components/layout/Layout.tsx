@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import Header from './Header'
+import Sidebar from './Sidebar'
 import QuickCapture from '../ui/QuickCapture'
 import { useAuthStore } from '../../store/authStore'
 
@@ -9,24 +9,22 @@ interface LayoutProps {
 }
 
 const pageVariants = {
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -16 },
 }
 
 export default function Layout({ children }: LayoutProps) {
   const { isAuthenticated } = useAuthStore()
 
   return (
-    <div className="min-h-screen bg-neo-bg dark:bg-[#1a1a2e]">
-      <Header />
+    <div className="min-h-screen bg-neo-bg dark:bg-[#13131f]">
+      <Sidebar />
       <motion.main
         variants={pageVariants}
         initial="initial"
         animate="animate"
-        exit="exit"
-        transition={{ duration: 0.3, ease: 'easeOut' as const }}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        transition={{ duration: 0.25, ease: 'easeOut' as const }}
+        className="lg:ml-56 max-w-5xl mx-auto px-4 sm:px-6 py-6 pt-14 lg:pt-8"
       >
         {children}
       </motion.main>

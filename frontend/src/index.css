@@ -5,148 +5,150 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
   font-weight: 400;
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Neobrutalism CSS variables */
-  --neo-bg: #fffef7;
-  --neo-surface: #ffffff;
-  --neo-border: #2d2d2d;
-  --neo-text: #2d2d2d;
-  --neo-primary: #ff6b6b;
-  --neo-secondary: #4ecdc4;
-  --neo-accent: #ffe66d;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--neo-bg);
+  background-color: #fafafa;
+  color: #1a1a1a;
 }
 
-/* Neobrutalism base styles */
+/* Selection style - clean indigo */
 @layer base {
   ::selection {
-    background-color: #ffe66d;
-    color: #2d2d2d;
+    background-color: #6366f1;
+    color: white;
   }
 
-  /* Scrollbar styling */
   ::-webkit-scrollbar {
-    width: 10px;
+    width: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #fffef7;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #2d2d2d;
-    border-radius: 5px;
-    border: 2px solid #fffef7;
+    background: #d4d4d4;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a3a3a3;
   }
 
-  /* Focus outline - neobrutalism style */
   *:focus-visible {
-    outline: 3px solid #ff6b6b;
+    outline: 2px solid #6366f1;
     outline-offset: 2px;
+    border-radius: 4px;
   }
 
-  /* Dark mode base */
-  .dark {
-    --neo-bg: #1a1a2e;
-    --neo-surface: #252540;
-    --neo-border: #f0f0f0;
-    --neo-text: #f0f0f0;
-  }
-
+  /* Dark mode */
   .dark body {
-    background-color: #1a1a2e;
-    color: #f0f0f0;
+    background-color: #13131f;
+    color: #e0e0e0;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root:not(.light) {
-      --neo-bg: #1a1a2e;
-      --neo-surface: #252540;
-      --neo-border: #f0f0f0;
-      --neo-text: #f0f0f0;
-    }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #3a3a4e;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #4a4a5e;
   }
 }
 
-/* Neobrutalism utility components */
+/* Utility classes */
 @layer components {
-  .neo-card {
-    @apply bg-neo-surface border-3 border-neo-border rounded-xl shadow-neo;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  .card {
+    @apply bg-white border border-neo-border rounded-xl shadow-card transition-all duration-200;
   }
-  .neo-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px 0px #2d2d2d;
+  .card:hover {
+    @apply shadow-card-hover;
   }
 
-  .neo-btn {
-    @apply inline-flex items-center justify-center font-bold border-3 border-neo-border rounded-lg shadow-neo-sm;
-    transition: all 0.1s ease;
+  .card-hover-effect {
+    @apply transition-all duration-200;
   }
-  .neo-btn:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px 0px #2d2d2d;
-  }
-  .neo-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 0px 0px 0px 0px #2d2d2d;
+  .card-hover-effect:hover {
+    @apply -translate-y-0.5 shadow-card-hover;
   }
 
-  .neo-input {
-    @apply w-full px-4 py-3 border-3 border-neo-border rounded-lg bg-neo-surface text-neo-text font-medium;
-    transition: all 0.15s ease;
+  .input {
+    @apply w-full px-3.5 py-2.5 border border-neo-border rounded-xl bg-white text-neo-text text-sm;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  .neo-input:focus {
-    @apply outline-none;
-    box-shadow: 4px 4px 0px 0px #ff6b6b;
-    transform: translate(-1px, -1px);
+  .input:focus {
+    @apply outline-none border-neo-primary;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
-  .neo-input::placeholder {
+  .input::placeholder {
     @apply text-neo-muted;
   }
 
-  .neo-badge {
-    @apply inline-flex items-center px-3 py-1 border-2 border-neo-border rounded-full text-xs font-bold;
+  .pill {
+    @apply inline-flex items-center px-3.5 py-1.5 rounded-pill text-sm font-medium transition-all duration-150;
+  }
+  .pill-active {
+    @apply pill bg-neo-primary text-white shadow-sm;
+  }
+  .pill-inactive {
+    @apply pill text-neo-textSecondary bg-transparent hover:bg-gray-100;
   }
 
-  .neo-divider {
-    @apply border-t-3 border-neo-border;
+  .dark .card {
+    @apply bg-[#1c1c30] border-[#2a2a40];
+  }
+  .dark .card:hover {
+    @apply shadow-lg;
   }
 
-  .neo-link {
-    @apply font-bold text-neo-primary underline decoration-3 decoration-neo-primary underline-offset-4;
-    transition: all 0.15s ease;
+  .dark .input {
+    @apply bg-[#1c1c30] border-[#2a2a40] text-gray-200;
   }
-  .neo-link:hover {
-    @apply text-neo-secondary decoration-neo-secondary;
+  .dark .input:focus {
+    @apply border-neo-primary;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  .dark .pill-inactive {
+    @apply text-gray-400 hover:bg-[#2a2a40];
+  }
+
+  .page-header {
+    @apply mb-8;
+  }
+  .page-header h1 {
+    @apply text-page-title text-neo-text;
+  }
+  .page-header p {
+    @apply text-neo-textSecondary text-sm mt-1;
+  }
+
+  .page-header-row {
+    @apply flex items-center justify-between;
   }
 }
 
-/* Noise texture overlay (optional, adds grit) */
-@layer utilities {
-  .neo-noise {
-    position: relative;
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --neo-bg: #13131f;
+    --neo-surface: #1c1c30;
+    --neo-border: #2a2a40;
+    --neo-text: #e0e0e0;
   }
-  .neo-noise::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0.03;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 256px 256px;
-  }
+}
+
+.dark {
+  --neo-bg: #13131f;
+  --neo-surface: #1c1c30;
+  --neo-border: #2a2a40;
+  --neo-text: #e0e0e0;
 }

@@ -1,13 +1,24 @@
 import { createClient, Client } from '@libsql/client'
+import path from 'path'
+import fs from 'fs'
 
 let client: Client
 
 export function getDB(): Client {
   if (!client) {
-    client = createClient({
-      url: process.env.TURSO_DATABASE_URL!,
-      authToken: process.env.TURSO_AUTH_TOKEN,
-    })
+    const dbUrl = process.env.DATABASE_URL || `file:${path.resolve(process.cwd(), 'data', 'app.db')}`
+    console.log(`[DB] Connecting to: ${dbUrl}`)
+
+    // Ensure the data directory exists for local SQLite
+    if (dbUrl.startsWith('file:')) {
+      const filePath = dbUrl.replace(/^file:/, '')
+      const dir = path.dirname(filePath)
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+      }
+    }
+
+    client = createClient({ url: dbUrl })
   }
   return client
 }

@@ -36,7 +36,7 @@ export default function QuickNotes({ content, lastSaved, isSaving, onChange }: Q
     <Card padding="none" className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-6 pt-6 pb-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Notes</h2>
+        <h2 className="text-sm font-semibold text-neo-text">Quick Notes</h2>
         <span
           className={clsx(
             'text-xs font-medium transition-colors duration-300',

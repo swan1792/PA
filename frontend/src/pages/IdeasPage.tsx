@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useIdeaStore } from '../store/ideaStore'
 import Layout from '../components/layout/Layout'
 import Button from '../components/ui/Button'
+import { clsx } from 'clsx'
 
 const COLORS = ['#fef3c7', '#dbeafe', '#dcfce7', '#fce7f3', '#f3e8ff', '#e0f2fe', '#fed7aa', '#fecaca']
 
@@ -37,20 +38,33 @@ export default function IdeasPage() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">💡 Idea Board</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Capture your thoughts and ideas</p>
+        <div className="page-header">
+          <h1>💡 Idea Board</h1>
+          <p>Capture your thoughts and ideas</p>
         </div>
 
         {/* Add new idea */}
-        <div className="flex gap-3">
-          <input value={newContent} onChange={e => setNewContent(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAdd()} placeholder="New idea..." className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" />
-          <div className="flex gap-1">
-            {COLORS.map(c => (
-              <button key={c} onClick={() => setNewColor(c)} className={`w-8 h-8 rounded-full border-2 transition-all ${newColor === c ? 'border-brand-600 scale-110' : 'border-transparent'}`} style={{ backgroundColor: c }} />
-            ))}
+        <div className="flex gap-3 items-start">
+          <div className="flex-1 space-y-2">
+            <input
+              value={newContent}
+              onChange={e => setNewContent(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              placeholder="New idea..."
+              className="input"
+            />
+            <div className="flex gap-1.5">
+              {COLORS.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setNewColor(c)}
+                  className={clsx('w-6 h-6 rounded-full transition-all', newColor === c ? 'ring-2 ring-neo-primary ring-offset-1 scale-110' : 'ring-1 ring-gray-200 dark:ring-gray-600')}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
           </div>
-          <Button onClick={handleAdd}>Add</Button>
+          <Button onClick={handleAdd} className="mt-0">Add</Button>
         </div>
 
         {/* Ideas Grid */}

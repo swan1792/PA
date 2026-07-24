@@ -46,37 +46,37 @@ export default function TaskForm({ onSubmit, onCancel }: TaskFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label className="block text-sm font-medium text-neo-text mb-1">
           Title *
         </label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+          className="input"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Description
+        <label className="block text-sm font-medium text-neo-text mb-1">
+          Description <span className="text-neo-muted font-normal">(optional)</span>
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+          className="input resize-none"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+          <label className="block text-sm font-medium text-neo-text mb-1">Priority</label>
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as Task['priority'])}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+            className="input"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -84,23 +84,23 @@ export default function TaskForm({ onSubmit, onCancel }: TaskFormProps) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Due Date</label>
+          <label className="block text-sm font-medium text-neo-text mb-1">Due Date</label>
           <input
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+            className="input"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+          <label className="block text-sm font-medium text-neo-text mb-1">Category</label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+            className="input"
           >
             <option value="">None</option>
             {categories.map((c) => (
@@ -109,11 +109,11 @@ export default function TaskForm({ onSubmit, onCancel }: TaskFormProps) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Repeat</label>
+          <label className="block text-sm font-medium text-neo-text mb-1">Repeat</label>
           <select
             value={recurrence}
             onChange={(e) => setRecurrence(e.target.value as Task['recurrence'])}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+            className="input"
           >
             <option value="none">No repeat</option>
             <option value="daily">Daily</option>
@@ -130,18 +130,18 @@ export default function TaskForm({ onSubmit, onCancel }: TaskFormProps) {
             type="date"
             value={recurrenceEndDate}
             onChange={(e) => setRecurrenceEndDate(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+            className="input"
           />
         </div>
       )}
 
       {activeGoals.length > 0 && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link to Goal</label>
+          <label className="block text-sm font-medium text-neo-text mb-1">Link to Goal <span className="text-neo-muted font-normal">(optional)</span></label>
           <select
             value={goalId}
             onChange={(e) => setGoalId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:text-white"
+            className="input"
           >
             <option value="">None</option>
             {activeGoals.map((g) => (

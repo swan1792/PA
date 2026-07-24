@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../store/authStore'
-import GoogleSignIn from '../components/auth/GoogleSignIn'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -13,38 +12,32 @@ const containerVariants = {
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
 }
 
-// Decorative shapes for the background
 function DecorativeShapes() {
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
       <motion.div
-        animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
+        animate={{ y: [0, -12, 0], rotate: [0, 3, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-[10%] left-[10%] w-24 h-24 bg-neo-accent border-3 border-neo-border rounded-xl shadow-neo-sm"
+        className="absolute top-[10%] left-[10%] w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl"
       />
       <motion.div
-        animate={{ y: [0, 12, 0], rotate: [0, -8, 0] }}
+        animate={{ y: [0, 10, 0], rotate: [0, -5, 0] }}
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        className="absolute top-[20%] right-[15%] w-16 h-16 bg-neo-secondary border-3 border-neo-border rounded-full shadow-neo-sm"
+        className="absolute top-[20%] right-[15%] w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-full"
       />
       <motion.div
-        animate={{ y: [0, 10, 0], x: [0, -5, 0] }}
+        animate={{ y: [0, 8, 0], x: [0, -4, 0] }}
         transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        className="absolute bottom-[20%] left-[20%] w-20 h-20 bg-neo-primary border-3 border-neo-border rounded-xl shadow-neo-sm rotate-12"
+        className="absolute bottom-[20%] left-[20%] w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-2xl rotate-12"
       />
       <motion.div
-        animate={{ y: [0, -8, 0], rotate: [0, 10, 0] }}
+        animate={{ y: [0, -6, 0], rotate: [0, 8, 0] }}
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        className="absolute bottom-[15%] right-[10%] w-14 h-14 bg-neo-purple border-3 border-neo-border rounded-full shadow-neo-sm"
-      />
-      <motion.div
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-        className="absolute top-[50%] left-[5%] w-10 h-10 bg-neo-orange border-3 border-neo-border rounded-lg shadow-neo-sm rotate-45"
+        className="absolute bottom-[15%] right-[10%] w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full"
       />
     </div>
   )
@@ -77,12 +70,8 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleError = (errorMsg: string) => {
-    setLocalError(errorMsg)
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neo-bg dark:bg-[#1a1a2e] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#fafafa] dark:bg-[#13131f] p-4">
       <DecorativeShapes />
 
       <motion.div
@@ -94,14 +83,17 @@ export default function LoginPage() {
         {/* Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-neo-surface border-3 border-neo-border rounded-xl shadow-neo-lg p-8"
+          className="bg-white dark:bg-[#1c1c30] border border-neo-border rounded-2xl shadow-modal p-8"
         >
           {/* Header */}
           <motion.div variants={itemVariants}>
-            <h2 className="text-4xl font-black text-center text-neo-text dark:text-white font-display tracking-tight">
+            <div className="w-10 h-10 rounded-xl bg-neo-primary flex items-center justify-center text-white font-bold text-lg mb-5 mx-auto shadow-sm">
+              P
+            </div>
+            <h2 className="text-2xl font-bold text-center text-neo-text">
               {isLogin ? 'Welcome Back' : 'Join Us'}
             </h2>
-            <p className="mt-2 text-center text-neo-muted font-medium">
+            <p className="mt-1.5 text-center text-neo-textSecondary text-sm">
               {isLogin ? 'Sign in to your PA App' : 'Create your PA App account'}
             </p>
           </motion.div>
@@ -111,34 +103,17 @@ export default function LoginPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mt-4 bg-neo-danger/10 border-3 border-neo-danger text-neo-danger px-4 py-3 rounded-lg text-sm font-bold"
+              className="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-2.5 rounded-xl text-sm font-medium"
             >
               {localError || error}
             </motion.div>
           )}
 
-          {/* Google Sign-In */}
-          <motion.div variants={itemVariants} className="mt-6">
-            <GoogleSignIn onError={handleGoogleError} />
-          </motion.div>
-
-          {/* Divider */}
-          <motion.div variants={itemVariants} className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t-3 border-neo-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-neo-surface text-neo-muted font-bold uppercase tracking-wider text-xs">
-                Or continue with email
-              </span>
-            </div>
-          </motion.div>
-
           {/* Form */}
-          <motion.form variants={itemVariants} className="space-y-5" onSubmit={handleSubmit}>
+          <motion.form variants={itemVariants} className="space-y-4 mt-6" onSubmit={handleSubmit}>
             {!isLogin && (
               <div>
-                <label htmlFor="name" className="block text-sm font-bold text-neo-text dark:text-white mb-1">
+                <label htmlFor="name" className="block text-sm font-medium text-neo-text mb-1">
                   Name
                 </label>
                 <input
@@ -146,7 +121,7 @@ export default function LoginPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="neo-input dark:bg-[#252540] dark:text-white dark:border-gray-500"
+                  className="input"
                   required={!isLogin}
                   placeholder="Your name"
                 />
@@ -154,7 +129,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-bold text-neo-text dark:text-white mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-neo-text mb-1">
                 Email
               </label>
               <input
@@ -162,14 +137,14 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="neo-input dark:bg-[#252540] dark:text-white dark:border-gray-500"
+                className="input"
                 required
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-bold text-neo-text dark:text-white mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-neo-text mb-1">
                 Password
               </label>
               <input
@@ -177,41 +152,33 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="neo-input dark:bg-[#252540] dark:text-white dark:border-gray-500"
+                className="input"
                 required
                 minLength={6}
                 placeholder="••••••••"
               />
               {!isLogin && (
-                <p className="mt-1 text-xs text-neo-muted font-medium">Must be at least 6 characters</p>
+                <p className="mt-1 text-xs text-neo-muted">Must be at least 6 characters</p>
               )}
             </div>
 
-            <motion.button
+            <button
               type="submit"
               disabled={isLoading}
-              whileHover={isLoading ? {} : { y: -2, boxShadow: '4px 4px 0px 0px #2d2d2d' }}
-              whileTap={isLoading ? {} : { y: 2, x: 2, boxShadow: '0px 0px 0px 0px #2d2d2d' }}
-              className="w-full flex justify-center items-center py-3 px-4 border-3 border-neo-border rounded-lg shadow-neo-sm text-sm font-bold text-white bg-neo-primary hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-medium text-white bg-neo-primary hover:bg-neo-primaryHover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-button mt-6"
             >
               {isLoading ? (
-                <span className="flex items-center">
-                  <motion.svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </motion.svg>
+                  </svg>
                   Loading...
                 </span>
               ) : (
                 isLogin ? 'Sign In' : 'Create Account'
               )}
-            </motion.button>
+            </button>
           </motion.form>
 
           {/* Toggle */}
@@ -223,7 +190,7 @@ export default function LoginPage() {
                 setLocalError('')
                 clearError()
               }}
-              className="text-sm font-bold text-neo-primary hover:text-neo-secondary transition-colors underline decoration-3 decoration-neo-primary underline-offset-4 hover:decoration-neo-secondary"
+              className="text-sm font-medium text-neo-primary hover:text-neo-primaryHover transition-colors"
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
