@@ -14,13 +14,13 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.05 },
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
 }
 
 export default function DashboardPage() {
@@ -30,10 +30,15 @@ export default function DashboardPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-8"
+        className="space-y-6"
       >
+        <div className="page-header">
+          <h1>Dashboard</h1>
+          <p>Your daily overview at a glance</p>
+        </div>
+
         {/* Top Row: Weather + Weekly Overview */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <WeatherWidget />
           <WeeklyOverview />
         </motion.div>
@@ -44,14 +49,14 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Widgets Row */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <DailySummary />
           <ProductivityScore />
           <FocusTimer />
         </motion.div>
 
         {/* Mood + Sound Row */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <MoodCheckIn />
           <SoundPlayer />
         </motion.div>

@@ -1,8 +1,7 @@
 import { clsx } from 'clsx'
-import { motion, HTMLMotionProps } from 'framer-motion'
-import { ReactNode } from 'react'
+import { ButtonHTMLAttributes, ReactNode } from 'react'
 
-interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent'
   size?: 'sm' | 'md' | 'lg'
   isLoading?: boolean
@@ -19,23 +18,25 @@ export default function Button({
   ...props
 }: ButtonProps) {
   return (
-    <motion.button
-      whileHover={disabled || isLoading ? {} : { y: -2, boxShadow: '4px 4px 0px 0px #2d2d2d' }}
-      whileTap={disabled || isLoading ? {} : { y: 2, x: 2, boxShadow: '0px 0px 0px 0px #2d2d2d' }}
-      transition={{ duration: 0.1 }}
+    <button
       className={clsx(
-        'inline-flex items-center justify-center font-bold border-3 border-neo-border rounded-lg shadow-neo-sm transition-colors focus:outline-none',
+        'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 shadow-button focus:outline-none',
         {
           // Variants
-          'bg-neo-primary text-white hover:bg-red-500': variant === 'primary',
-          'bg-neo-secondary text-neo-border hover:bg-teal-400': variant === 'secondary',
-          'bg-transparent border-transparent shadow-none hover:bg-gray-100 dark:hover:bg-gray-800': variant === 'ghost',
-          'bg-neo-danger text-white hover:bg-red-600': variant === 'danger',
-          'bg-neo-accent text-neo-border hover:bg-yellow-300': variant === 'accent',
+          'bg-neo-primary text-white hover:bg-neo-primaryHover active:bg-indigo-700':
+            variant === 'primary',
+          'bg-white text-neo-text border border-neo-border hover:bg-gray-50 active:bg-gray-100 dark:bg-[#1c1c30] dark:hover:bg-[#2a2a40] dark:border-[#2a2a40]':
+            variant === 'secondary',
+          'bg-transparent text-neo-textSecondary hover:text-neo-text hover:bg-gray-100 dark:hover:bg-[#2a2a40] shadow-none':
+            variant === 'ghost',
+          'bg-neo-danger text-white hover:bg-red-600 active:bg-red-700':
+            variant === 'danger',
+          'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800':
+            variant === 'accent',
           // Sizes
-          'px-3 py-1.5 text-sm': size === 'sm',
-          'px-5 py-2.5 text-base': size === 'md',
-          'px-7 py-3.5 text-lg': size === 'lg',
+          'px-3 py-1.5 text-xs gap-1.5': size === 'sm',
+          'px-4 py-2 text-sm gap-2': size === 'md',
+          'px-5 py-2.5 text-base gap-2': size === 'lg',
           // Disabled
           'opacity-50 cursor-not-allowed': disabled || isLoading,
         },
@@ -46,21 +47,19 @@ export default function Button({
     >
       {isLoading ? (
         <>
-          <motion.svg
+          <svg
             className="animate-spin -ml-1 mr-2 h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           >
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </motion.svg>
+          </svg>
           Loading...
         </>
       ) : (
         children
       )}
-    </motion.button>
+    </button>
   )
 }

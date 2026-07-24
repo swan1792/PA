@@ -81,17 +81,19 @@ export default function CalendarPage() {
     <Layout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Calendar</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">View your tasks and moods on a calendar</p>
+        <div className="page-header">
+          <div className="page-header-row">
+            <div>
+              <h1>Calendar</h1>
+              <p>View your tasks and moods on a calendar</p>
+            </div>
+            <button
+              onClick={goToToday}
+              className="pill-inactive text-xs"
+            >
+              Today
+            </button>
           </div>
-          <button
-            onClick={goToToday}
-            className="px-4 py-2 text-sm font-medium text-brand-600 bg-brand-50 rounded-lg hover:bg-brand-100 dark:bg-brand-900/20 dark:text-brand-400 dark:hover:bg-brand-900/30 transition-colors"
-          >
-            Today
-          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -99,30 +101,30 @@ export default function CalendarPage() {
           <div className="lg:col-span-3">
             <Card className="overflow-hidden">
               {/* Month Navigation */}
-              <div className="flex items-center justify-between mb-6 px-1">
+              <div className="flex items-center justify-between mb-5 px-0.5">
                 <button
                   onClick={prevMonth}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="p-2 rounded-lg text-neo-textSecondary hover:text-neo-text hover:bg-gray-100 dark:hover:bg-[#2a2a40] transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                   </svg>
                 </button>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-base font-semibold text-neo-text">
                   {MONTHS[month]} {year}
                 </h2>
                 <button
                   onClick={nextMonth}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  className="p-2 rounded-lg text-neo-textSecondary hover:text-neo-text hover:bg-gray-100 dark:hover:bg-[#2a2a40] transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>
               </div>
 
               {/* Day Headers */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-px mb-1">
                 {DAYS.map((d) => (
                   <div
                     key={d}
@@ -130,7 +132,7 @@ export default function CalendarPage() {
                       'text-center text-xs font-semibold py-2',
                       d === 'Sun' || d === 'Sat'
                         ? 'text-red-400 dark:text-red-500'
-                        : 'text-gray-500 dark:text-gray-400'
+                        : 'text-neo-muted'
                     )}
                   >
                     {d}
@@ -139,9 +141,9 @@ export default function CalendarPage() {
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-px">
                 {calendarDays.map((day, i) => {
-                  if (!day) return <div key={`empty-${i}`} className="min-h-[90px]" />
+                  if (!day) return <div key={`empty-${i}`} className="min-h-[80px]" />
                   const dateStr = getDateStr(day)
                   const dayTasks = getTasksForDate(dateStr)
                   const mood = getMoodForDate(dateStr)
@@ -153,59 +155,56 @@ export default function CalendarPage() {
                     <motion.button
                       key={dateStr}
                       onClick={() => setSelectedDate(dateStr)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileTap={{ scale: 0.95 }}
                       className={clsx(
-                        'relative flex flex-col items-start p-2 rounded-xl min-h-[90px] transition-all duration-200 border',
-                        isToday && !isSelected && 'border-brand-300 dark:border-brand-700 bg-brand-50/50 dark:bg-brand-900/10',
-                        isSelected && 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 shadow-md shadow-brand-100 dark:shadow-brand-900/20',
-                        !isSelected && !isToday && 'border-transparent hover:border-gray-200 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50',
-                        isWeekend && !isSelected && !isToday && 'bg-gray-50/50 dark:bg-gray-800/20'
+                        'relative flex flex-col items-start p-1.5 min-h-[80px] transition-all duration-150 rounded-lg',
+                        isToday && !isSelected && 'bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-300 dark:ring-blue-700',
+                        isSelected && 'bg-gray-100 dark:bg-[#2a2a40] ring-1 ring-gray-300 dark:ring-gray-600',
+                        !isSelected && !isToday && 'hover:bg-gray-50 dark:hover:bg-[#252538]',
+                        isWeekend && !isSelected && !isToday && 'bg-gray-50/50 dark:bg-gray-800/10'
                       )}
                     >
                       {/* Date Number */}
-                      <div className="flex items-center justify-between w-full">
-                        <span
-                          className={clsx(
-                            'text-sm font-semibold w-7 h-7 flex items-center justify-center rounded-full',
-                            isToday
-                              ? 'bg-brand-500 text-white'
-                              : isSelected
-                              ? 'text-brand-600 dark:text-brand-400'
-                              : isWeekend
-                              ? 'text-red-500 dark:text-red-400'
-                              : 'text-gray-700 dark:text-gray-300'
-                          )}
-                        >
-                          {day}
-                        </span>
-                        {mood && (
-                          <span className={clsx('text-lg', moodColors[mood.mood])}>
-                            {moodEmojis[mood.mood]}
-                          </span>
+                      <span
+                        className={clsx(
+                          'text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full',
+                          isToday
+                            ? 'bg-neo-primary text-white'
+                            : isSelected
+                            ? 'text-neo-text'
+                            : isWeekend
+                            ? 'text-red-500 dark:text-red-400'
+                            : 'text-neo-textSecondary'
                         )}
-                      </div>
+                      >
+                        {day}
+                      </span>
 
-                      {/* Task Indicators */}
+                      {/* Mood indicator */}
+                      {mood && (
+                        <span className={clsx('text-xs mt-0.5', moodColors[mood.mood])}>
+                          {moodEmojis[mood.mood]}
+                        </span>
+                      )}
+
+                      {/* Task dots */}
                       {dayTasks.length > 0 && (
-                        <div className="mt-auto pt-2 w-full">
-                          <div className="flex flex-wrap gap-1">
-                            {dayTasks.slice(0, 3).map((t) => (
-                              <div
-                                key={t.id}
-                                className={clsx(
-                                  'h-1.5 rounded-full flex-1 min-w-[12px]',
-                                  priorityColors[t.priority],
-                                  t.status === 'done' && 'opacity-40'
-                                )}
-                              />
-                            ))}
-                            {dayTasks.length > 3 && (
-                              <span className="text-[10px] text-gray-400 ml-1">
-                                +{dayTasks.length - 3}
-                              </span>
-                            )}
-                          </div>
+                        <div className="mt-auto pt-1 w-full flex gap-0.5">
+                          {dayTasks.slice(0, 3).map((t) => (
+                            <div
+                              key={t.id}
+                              className={clsx(
+                                'h-1 rounded-full flex-1 max-w-[14px]',
+                                priorityColors[t.priority],
+                                t.status === 'done' && 'opacity-40'
+                              )}
+                            />
+                          ))}
+                          {dayTasks.length > 3 && (
+                            <span className="text-[9px] text-neo-muted ml-0.5">
+                              +{dayTasks.length - 3}
+                            </span>
+                          )}
                         </div>
                       )}
                     </motion.button>
@@ -214,27 +213,26 @@ export default function CalendarPage() {
               </div>
 
               {/* Legend */}
-              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                <span className="text-xs text-gray-500 dark:text-gray-400">Priority:</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500" />
-                  <span className="text-xs text-gray-600 dark:text-gray-400">High</span>
+              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-neo-border">
+                <span className="text-xs text-neo-muted">Priority:</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                  <span className="text-xs text-neo-textSecondary">High</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-amber-500" />
-                  <span className="text-xs text-gray-600 dark:text-gray-400">Medium</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                  <span className="text-xs text-neo-textSecondary">Medium</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="text-xs text-gray-600 dark:text-gray-400">Low</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-xs text-neo-textSecondary">Low</span>
                 </div>
               </div>
             </Card>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Selected Date Details */}
+          <div className="space-y-5">
             <AnimatePresence mode="wait">
               {selectedDate ? (
                 <motion.div
@@ -246,7 +244,7 @@ export default function CalendarPage() {
                 >
                   <Card>
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <h3 className="text-sm font-semibold text-neo-text">
                         {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
                           weekday: 'short',
                           month: 'short',
@@ -255,47 +253,47 @@ export default function CalendarPage() {
                       </h3>
                       <button
                         onClick={() => setSelectedDate(null)}
-                        className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="p-1 rounded-lg text-neo-muted hover:text-neo-text hover:bg-gray-100 dark:hover:bg-[#2a2a40] transition-colors"
                       >
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
 
                     {selectedTasks.length === 0 && !selectedMood && (
-                      <div className="text-center py-6">
-                        <span className="text-4xl">📭</span>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">No entries for this date</p>
+                      <div className="text-center py-8">
+                        <span className="text-2xl">📭</span>
+                        <p className="text-neo-textSecondary text-xs mt-2">No entries for this date</p>
                       </div>
                     )}
 
                     {selectedTasks.length > 0 && (
                       <div className="space-y-2 mb-4">
-                        <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h4 className="text-[11px] font-semibold text-neo-muted uppercase tracking-wider">
                           Tasks ({selectedTasks.length})
                         </h4>
                         {selectedTasks.map((t) => (
                           <div
                             key={t.id}
                             className={clsx(
-                              'flex items-center gap-3 p-2.5 rounded-lg border',
+                              'flex items-center gap-2.5 p-2.5 rounded-lg border',
                               priorityBg[t.priority],
                               t.status === 'done' && 'opacity-60'
                             )}
                           >
-                            <div className={clsx('w-2 h-2 rounded-full', priorityColors[t.priority])} />
+                            <div className={clsx('w-1.5 h-1.5 rounded-full flex-shrink-0', priorityColors[t.priority])} />
                             <span
                               className={clsx(
                                 'text-sm flex-1',
-                                t.status === 'done' && 'line-through text-gray-400'
+                                t.status === 'done' && 'line-through text-neo-muted'
                               )}
                             >
                               {t.title}
                             </span>
                             {t.status === 'done' && (
-                              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <svg className="w-3.5 h-3.5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                               </svg>
                             )}
                           </div>
@@ -304,16 +302,16 @@ export default function CalendarPage() {
                     )}
 
                     {selectedMood && (
-                      <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                        <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                      <div className="pt-4 border-t border-neo-border">
+                        <h4 className="text-[11px] font-semibold text-neo-muted uppercase tracking-wider mb-3">
                           Mood & Energy
                         </h4>
-                        <div className="flex items-center gap-4">
-                          <span className="text-3xl">{moodEmojis[selectedMood.mood]}</span>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs text-gray-500">Mood</span>
-                              <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{moodEmojis[selectedMood.mood]}</span>
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-neo-textSecondary w-9">Mood</span>
+                              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-[#2a2a40] rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-gradient-to-r from-red-400 to-green-400 rounded-full"
                                   style={{ width: `${(selectedMood.mood / 5) * 100}%` }}
@@ -321,8 +319,8 @@ export default function CalendarPage() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-gray-500">Energy</span>
-                              <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                              <span className="text-xs text-neo-textSecondary w-9">Energy</span>
+                              <div className="flex-1 h-1.5 bg-gray-100 dark:bg-[#2a2a40] rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-gradient-to-r from-blue-400 to-yellow-400 rounded-full"
                                   style={{ width: `${(selectedMood.energy / 5) * 100}%` }}
@@ -332,7 +330,7 @@ export default function CalendarPage() {
                           </div>
                         </div>
                         {selectedMood.note && (
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <p className="text-sm text-neo-textSecondary mt-3 p-2.5 bg-gray-50 dark:bg-[#252538] rounded-lg">
                             {selectedMood.note}
                           </p>
                         )}
@@ -347,27 +345,27 @@ export default function CalendarPage() {
                   transition={{ delay: 0.1 }}
                 >
                   <Card>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    <h3 className="text-sm font-semibold text-neo-text mb-4">
                       Upcoming Tasks
                     </h3>
                     {upcomingTasks.length === 0 ? (
-                      <div className="text-center py-6">
-                        <span className="text-4xl">✨</span>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">No upcoming tasks</p>
+                      <div className="text-center py-8">
+                        <span className="text-2xl">✨</span>
+                        <p className="text-neo-textSecondary text-xs mt-2">No upcoming tasks</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {upcomingTasks.map((t) => (
                           <div
                             key={t.id}
-                            className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#252538] transition-colors"
                           >
-                            <div className={clsx('w-2 h-2 rounded-full', priorityColors[t.priority])} />
+                            <div className={clsx('w-1.5 h-1.5 rounded-full flex-shrink-0', priorityColors[t.priority])} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
+                              <p className="text-sm font-medium text-neo-text truncate">
                                 {t.title}
                               </p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-neo-muted">
                                 {t.dueDate
                                   ? new Date(t.dueDate + 'T00:00:00').toLocaleDateString('en-US', {
                                       weekday: 'short',

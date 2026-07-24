@@ -1,30 +1,28 @@
 import { clsx } from 'clsx'
-import { motion } from 'framer-motion'
 
 interface BadgeProps {
   variant: 'todo' | 'in_progress' | 'done' | 'low' | 'medium' | 'high'
   children: React.ReactNode
 }
 
-const variants = {
-  todo: 'bg-gray-200 text-neo-border',
-  in_progress: 'bg-neo-blue text-white',
-  done: 'bg-neo-success text-neo-border',
-  low: 'bg-gray-200 text-neo-muted',
-  medium: 'bg-neo-warning text-neo-border',
-  high: 'bg-neo-danger text-white',
+const styles = {
+  todo: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  in_progress: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+  done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
+  low: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  medium: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300',
+  high: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300',
 }
 
 export default function Badge({ variant, children }: BadgeProps) {
   return (
-    <motion.span
-      whileHover={{ rotate: [-2, 2, 0], transition: { duration: 0.3 } }}
+    <span
       className={clsx(
-        'inline-flex items-center px-3 py-1 border-2 border-neo-border rounded-full text-xs font-bold shadow-neo-sm',
-        variants[variant]
+        'inline-flex items-center px-2.5 py-0.5 rounded-pill text-xs font-medium',
+        styles[variant]
       )}
     >
       {children}
-    </motion.span>
+    </span>
   )
 }
