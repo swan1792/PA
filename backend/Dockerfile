@@ -6,13 +6,13 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache python3 make g++
 
-# Copy package files
-COPY package.json package-lock.json ./
+# Copy package files (paths relative to repo root, Railway's default build context)
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci
 
 # Copy source
-COPY tsconfig.json ./
-COPY src ./src
+COPY backend/tsconfig.json ./
+COPY backend/src ./src
 
 # Build
 RUN npm run build
