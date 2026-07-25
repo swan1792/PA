@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const TasksPage = lazy(() => import('./pages/TasksPage'))
@@ -35,6 +36,7 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<Protected><DashboardPage /></Protected>} />
           <Route path="/tasks" element={<Protected><TasksPage /></Protected>} />
