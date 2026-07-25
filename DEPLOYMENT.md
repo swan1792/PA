@@ -3,7 +3,7 @@
 This project is deployed using **free-tier** services with **auto-deploy from GitHub**:
 
 - **Frontend** → [Vercel](https://vercel.com) (React + Vite + Tailwind) — auto-deploys on push
-- **Backend** → [Railway](https://railway.app) (Express + TypeScript, Dockerized) — auto-deploys on push
+- **Backend** → [Railway](https://railway.app) (Express + TypeScript, Nixpacks build) — auto-deploys on push
 - **Database** → SQLite via Railway Volumes (persistent storage, free tier)
 - **No API tokens required** — both platforms connect directly to GitHub
 
@@ -78,7 +78,7 @@ The app uses SQLite locally via `data/app.db`. On Railway, the filesystem is **e
 
 ### 2.1 How It Works
 
-- The Dockerfile creates `/app/data` for the database file
+- The Railway Nixpacks image creates `/app/data` for the database file
 - A Railway Volume mounts a persistent disk at `/app/data`
 - The app writes `app.db` inside that directory — it survives restarts and redeploys
 - The Volume is bound to your Railway service and persists across deployments
@@ -125,11 +125,9 @@ If you want to pre-seed data (e.g., achievements), the app also runs `seedAchiev
 2. Click **New Project** → **Deploy from GitHub repo**
 3. Select your repository
 4. Railway auto-detects `railway.json` and uses it to configure the build:
-   - **Builder**: `DOCKERFILE`
-   - **Dockerfile path**: `backend/Dockerfile`
-   - **Build context**: `backend` (set in `railway.json` — COPY paths are relative to `backend/`)
-
-5. No need to manually set a root directory — `railway.json` handles everything
+   - **Builder**: `NIXPACKS` (Railway's built-in Node.js auto-detection)
+   - **Root directory**: `backend` (set in `railway.json` — scopes the build to the backend folder)
+5. No need to manually set anything — `railway.json` handles everything
 
 ### 3.2 Configure Environment Variables
 
@@ -414,8 +412,7 @@ If API requests return 401 after login:
 | `backend/.env` | Local backend environment variables |
 | `backend/.env.example` | Template with documented variables |
 | `frontend/.env` | Local frontend environment variables |
-| `backend/Dockerfile` | Multi-stage Docker build — COPY paths relative to `backend/` context |
-| `railway.json` | Railway project config — sets Docker builder, Dockerfile path, and build context |
+| `railway.json` | Railway project config — Nixpacks builder, root directory `backend` |
 | `vercel.json` | Root Vercel config — SPA rewrites for client-side routing |
 | `.github/workflows/deploy.yml` | CI/CD type-check pipeline |
 
@@ -423,21 +420,24 @@ If API requests return 401 after login:
 
 ## 10. Docker Build (Alternative Deploy)
 
-If you want to deploy the backend on a different Docker-compatible platform (Fly.io, Render, DigitalOcean App Platform, etc.):
+If you want to run the backend in a container on another platform (Fly.io, Render, DigitalOcean, etc.), you'll need to create a `Dockerfile` in the `backend/` directory:
 
-```bash
-# Build the image (context must be backend/)
-docker build -t pa-app-backend -f backend/Dockerfile backend
-
-# Run locally to test
-docker run -p 3001:3001 \
-  -e DATABASE_URL=file:./data/app.db \
-  -e JWT_SECRET=your-secret \
-  -e CORS_ORIGIN=http://localhost:5173 \
-  pa-app-backend
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+EXPOSE ${PORT:-3001}
+CMD ["node", "dist/index.js"]
 ```
 
-> **Note:** The build context is `backend/` — COPY paths in the Dockerfile are relative to that directory. Railway handles this via the `context` setting in `railway.json`.
+Then build from the repo root:
+
+```bash
+docker build -t pa-app-backend -f backend/Dockerfile .
+```
 
 ---
 
