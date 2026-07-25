@@ -127,7 +127,7 @@ If you want to pre-seed data (e.g., achievements), the app also runs `seedAchiev
 4. Railway auto-detects `railway.json` and uses it to configure the build:
    - **Builder**: `DOCKERFILE`
    - **Dockerfile path**: `backend/Dockerfile`
-   - **Build context**: repo root (default — Dockerfile COPY paths use `backend/` prefixes)
+   - **Build context**: `backend` (set in `railway.json` — COPY paths are relative to `backend/`)
 
 5. No need to manually set a root directory — `railway.json` handles everything
 
@@ -414,8 +414,8 @@ If API requests return 401 after login:
 | `backend/.env` | Local backend environment variables |
 | `backend/.env.example` | Template with documented variables |
 | `frontend/.env` | Local frontend environment variables |
-| `backend/Dockerfile` | Multi-stage Docker build — paths use `backend/` prefix (repo root context) |
-| `railway.json` | Railway project config — sets Docker builder and Dockerfile path |
+| `backend/Dockerfile` | Multi-stage Docker build — COPY paths relative to `backend/` context |
+| `railway.json` | Railway project config — sets Docker builder, Dockerfile path, and build context |
 | `vercel.json` | Root Vercel config — SPA rewrites for client-side routing |
 | `.github/workflows/deploy.yml` | CI/CD type-check pipeline |
 
@@ -426,8 +426,8 @@ If API requests return 401 after login:
 If you want to deploy the backend on a different Docker-compatible platform (Fly.io, Render, DigitalOcean App Platform, etc.):
 
 ```bash
-# Build the image (run from repo root)
-docker build -t pa-app-backend -f backend/Dockerfile .
+# Build the image (context must be backend/)
+docker build -t pa-app-backend -f backend/Dockerfile backend
 
 # Run locally to test
 docker run -p 3001:3001 \
@@ -437,7 +437,7 @@ docker run -p 3001:3001 \
   pa-app-backend
 ```
 
-> **Note:** The build context is the repo root. COPY paths in the Dockerfile use `backend/` prefixes. Railway handles this automatically via the default context.
+> **Note:** The build context is `backend/` — COPY paths in the Dockerfile are relative to that directory. Railway handles this via the `context` setting in `railway.json`.
 
 ---
 
