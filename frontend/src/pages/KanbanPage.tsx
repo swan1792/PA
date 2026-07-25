@@ -77,7 +77,7 @@ export default function KanbanPage() {
         <div className="page-header">
           <div className="page-header-row">
             <div>
-              <h1>Kanban Board</h1>
+              <h1>Board</h1>
               <p>Drag tasks between columns</p>
             </div>
             <select
