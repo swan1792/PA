@@ -22,6 +22,7 @@ import { ideaRoutes } from './routes/ideas'
 import { readingListRoutes } from './routes/readingList'
 import { workoutRoutes } from './routes/workouts'
 import { expenseRoutes } from './routes/expenses'
+import { budgetRoutes } from './routes/budgets'
 import { achievementRoutes } from './routes/achievements'
 import { reminderRoutes } from './routes/reminders'
 import { settingsRoutes } from './routes/settings'
@@ -74,6 +75,7 @@ app.use('/api/ideas', ideaRoutes)
 app.use('/api/reading-list', readingListRoutes)
 app.use('/api/workouts', workoutRoutes)
 app.use('/api/expenses', expenseRoutes)
+app.use('/api/budgets', budgetRoutes)
 app.use('/api/achievements', achievementRoutes)
 app.use('/api/reminders', reminderRoutes)
 app.use('/api/settings', settingsRoutes)

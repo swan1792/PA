@@ -81,6 +81,19 @@ export interface Sound {
   url: string
 }
 
+export interface Budget {
+  id: string
+  user_id: string
+  category: string
+  month: string
+  amount: number
+  spent: number
+  remaining: number
+  percentUsed: number
+  created_at: string
+  updated_at: string
+}
+
 export interface ApiResponse<T> {
   data: T
   meta?: {

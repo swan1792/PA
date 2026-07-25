@@ -56,7 +56,19 @@ export default function FocusTimer() {
 
   return (
     <Card>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">🎯 Focus Timer</h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">🎯 Focus Timer</h3>
+          <div className="group relative">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs cursor-help font-bold">?</span>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs leading-relaxed shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <p className="font-medium mb-1">🍅 Pomodoro Technique</p>
+              <p>Work in focused 25-minute intervals, then take a 5-minute break. After 4 cycles, take a longer 15-30 minute break. Choose a duration that works best for you.</p>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Timer Circle */}
       <div className="flex justify-center mb-6">

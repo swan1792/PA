@@ -11,7 +11,7 @@ const NAV_SECTIONS = [
       { to: '/dashboard', label: 'Dashboard', emoji: '📊' },
       { to: '/tasks', label: 'Tasks', emoji: '✅' },
       { to: '/calendar', label: 'Calendar', emoji: '📅' },
-      { to: '/kanban', label: 'Kanban', emoji: '📋' },
+      { to: '/kanban', label: 'Board', emoji: '📋' },
     ],
   },
   {
