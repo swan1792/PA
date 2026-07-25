@@ -3,13 +3,13 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files (paths relative to repo root, which is Railway's default build context)
-COPY backend/package.json backend/package-lock.json ./
+# Copy package files
+COPY package.json package-lock.json ./
 RUN npm ci
 
 # Copy source
-COPY backend/tsconfig.json ./
-COPY backend/src ./src
+COPY tsconfig.json ./
+COPY src ./src
 
 # Build
 RUN npm run build
@@ -18,9 +18,6 @@ RUN npm run build
 FROM node:20-alpine AS runner
 
 WORKDIR /app
-
-# Install wget for health checks
-RUN apk add --no-cache wget
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data
@@ -32,10 +29,6 @@ COPY --from=builder /app/node_modules ./node_modules
 
 # Expose the application port
 EXPOSE ${PORT:-3001}
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT:-3001}/api/health || exit 1
 
 # Start the server
 CMD ["node", "dist/index.js"]
