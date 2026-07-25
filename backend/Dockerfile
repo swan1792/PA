@@ -2,11 +2,11 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Copy dependency manifests
-COPY package.json package-lock.json ./
+# Copy dependency manifest
+COPY package.json ./
 
 # Install ALL dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install
 
 # ---- Stage 2: Build ----
 FROM node:20-alpine AS build
@@ -28,9 +28,9 @@ WORKDIR /app
 # Create data directory for SQLite (volume mount point)
 RUN mkdir -p /app/data
 
-# Copy only production dependencies
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Install only production dependencies
+COPY package.json ./
+RUN npm install --omit=dev
 
 # Copy compiled output
 COPY --from=build /app/dist ./dist
