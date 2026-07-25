@@ -40,7 +40,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
     >
       <div
         className={clsx(
-          'bg-white rounded-2xl shadow-modal w-full animate-scale-in overflow-hidden dark:bg-[#1c1c30]',
+          'bg-white rounded-2xl shadow-modal w-full animate-scale-in dark:bg-[#1c1c30]',
           {
             'max-w-sm': size === 'sm',
             'max-w-lg': size === 'md',

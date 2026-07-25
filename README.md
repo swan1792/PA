@@ -37,7 +37,7 @@ A full-stack personal productivity and life management platform. Track your task
 
 ### Backend
 - **Node.js** with Express 4 and TypeScript
-- **SQLite** via sql.js (in-memory with file persistence)
+- **@libsql/client** — SQLite-compatible client (local file or Turso/libSQL in production)
 - **JWT** authentication (7-day expiry)
 - **bcryptjs** for password hashing
 - **Zod** for input validation
@@ -79,6 +79,16 @@ cd frontend && npm install && cd ..
    GOOGLE_CLIENT_SECRET=your-google-client-secret
    ```
 
+3. **Database configuration** — set `DATABASE_URL` in `backend/.env`:
+   ```
+   # Local SQLite (default — uses file:./data/app.db if not set)
+   DATABASE_URL=file:./data/app.db
+
+   # Production (e.g. Turso/libSQL)
+   DATABASE_URL=libsql://your-db-url.turso.io?authToken=your-token
+   ```
+   If `DATABASE_URL` is omitted, the app falls back to a local SQLite file at `backend/data/app.db`. Tables are created automatically on first startup — no separate migration step is needed.
+
 3. (Optional) Set the frontend Google client ID in `frontend/.env`:
    ```
    VITE_GOOGLE_CLIENT_ID=your-google-client-id
@@ -119,10 +129,10 @@ PA_App/
 │   │   ├── routes/           # 21 route files
 │   │   ├── middleware/       # Auth + error handling
 │   │   ├── utils/            # Helpers (async handler, Google auth)
-│   │   ├── db.ts             # SQLite init + 20 tables
+│   │   ├── db.ts             # @libsql client init + table creation
 │   │   └── index.ts          # Express entry point
-│   ├── data/app.db           # SQLite database file
-│   └── .env
+│   ├── data/app.db           # Local SQLite database (auto-created)
+│   └── .env                  # DATABASE_URL, JWT_SECRET, etc.
 │
 └── package.json              # Root scripts (dev, build)
 ```
