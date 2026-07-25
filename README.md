@@ -4,6 +4,26 @@ A full-stack personal productivity and life management platform. Track your task
 
 ---
 
+## Screenshots
+
+| Home | Login | Dashboard |
+|:---:|:---:|:---:|
+| ![Home](screenshots/01-home.png) | ![Login](screenshots/02-login.png) | ![Dashboard](screenshots/03-dashboard.png) |
+
+| Tasks | Kanban | Calendar |
+|:---:|:---:|:---:|
+| ![Tasks](screenshots/04-tasks.png) | ![Kanban](screenshots/05-kanban.png) | ![Calendar](screenshots/06-calendar.png) |
+
+| Journal | Goals | Expenses |
+|:---:|:---:|:---:|
+| ![Journal](screenshots/07-journal.png) | ![Goals](screenshots/08-goals.png) | ![Expenses](screenshots/09-expenses.png) |
+
+| Settings |
+|:---:|
+| ![Settings](screenshots/10-settings.png) |
+
+---
+
 ## Tech Stack
 
 ### Frontend
