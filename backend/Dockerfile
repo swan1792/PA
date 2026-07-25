@@ -3,11 +3,11 @@ FROM node:20-alpine AS build
 
 WORKDIR /build
 
-COPY package.json package-lock.json ./
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci
 
-COPY tsconfig.json ./
-COPY src ./src
+COPY backend/tsconfig.json ./
+COPY backend/src ./src
 RUN npm run build
 
 # ---- Production Stage ----
