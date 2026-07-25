@@ -3,16 +3,16 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
+# Install build dependencies (needed for native modules like @libsql/client)
 RUN apk add --no-cache python3 make g++
 
-# Copy package files (paths relative to repo root, Railway's default build context)
-COPY backend/package.json backend/package-lock.json ./
+# Copy package files
+COPY package.json package-lock.json ./
 RUN npm ci
 
 # Copy source
-COPY backend/tsconfig.json ./
-COPY backend/src ./src
+COPY tsconfig.json ./
+COPY src ./src
 
 # Build
 RUN npm run build
@@ -21,6 +21,9 @@ RUN npm run build
 FROM node:20-alpine AS runner
 
 WORKDIR /app
+
+# Install wget for health checks
+RUN apk add --no-cache wget
 
 # Create data directory for SQLite
 RUN mkdir -p /app/data

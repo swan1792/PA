@@ -124,8 +124,11 @@ If you want to pre-seed data (e.g., achievements), the app also runs `seedAchiev
 1. Go to [railway.app](https://railway.app) → **Dashboard**
 2. Click **New Project** → **Deploy from GitHub repo**
 3. Select your repository
-4. Railway auto-detects `railway.json` and `backend/Dockerfile`
-5. Railway automatically sets the **root directory** based on the Dockerfile path in `railway.json`
+4. Railway auto-detects `railway.json` and uses it to configure the build:
+   - **Builder**: `DOCKERFILE`
+   - **Dockerfile path**: `backend/Dockerfile`
+   - **Build context**: `backend` (set explicitly in `railway.json` — the context is the directory the Dockerfile can reference files from)
+5. No need to manually set a root directory — `railway.json` handles everything
 
 ### 3.2 Configure Environment Variables
 
@@ -212,7 +215,7 @@ In Vercel project → **Settings → Environment Variables**, add:
 
 ### 4.3 SPA Routing
 
-The `frontend/vercel.json` already handles client-side routing:
+Both `vercel.json` (repo root) and `frontend/vercel.json` include the same SPA rewrite rule:
 
 ```json
 {
@@ -221,6 +224,9 @@ The `frontend/vercel.json` already handles client-side routing:
   ]
 }
 ```
+
+- **`vercel.json`** (root) — active when you set the root directory to the repo root in Vercel
+- **`frontend/vercel.json`** — active when you set the root directory to `frontend` (as recommended in Section 4.1)
 
 This ensures all paths (e.g., `/tasks`, `/habits`, `/settings`) serve `index.html` and let React Router handle the routing.
 
@@ -264,16 +270,16 @@ Both Railway and Vercel provide **free auto-deploy** directly from your GitHub r
 
 There's nothing extra to configure — once you connect your GitHub repo during project creation (as covered in Sections 3 and 4), auto-deploy is enabled by default.
 
-### 5.2 GitHub Actions (Optional — Type-Check Only)
+### 5.2 GitHub Actions (Type-Check Only)
 
-The `.github/workflows/deploy.yml` file is included for teams that want **type-checking on PRs**. It runs on every push and every PR without needing any secrets:
+The `.github/workflows/deploy.yml` file runs **type-checking and build verification** on every push and every PR — no secrets needed:
 
 | Event | What Runs |
 |---|---|
 | Push to any branch | TypeScript type-check + build (frontend + backend) |
 | PR to `main` | TypeScript type-check + build (frontend + backend) |
 
-> The deploy jobs in that workflow are **disabled by default** since you're using free auto-deploy. If you ever want to switch to token-based CI/CD, uncomment those jobs and add the secrets.
+This workflow does **not** deploy anything — it's a safety net to catch TypeScript errors before they reach production. Actual deployment is handled by Vercel and Railway's built-in auto-deploy from GitHub.
 
 ---
 
@@ -407,10 +413,10 @@ If API requests return 401 after login:
 | `backend/.env` | Local backend environment variables |
 | `backend/.env.example` | Template with documented variables |
 | `frontend/.env` | Local frontend environment variables |
-| `backend/Dockerfile` | Multi-stage Docker build (builder → runner) — creates `/app/data` dir |
-| `railway.json` | Railway project configuration |
-| `frontend/vercel.json` | Vercel SPA rewrites configuration |
-| `.github/workflows/deploy.yml` | CI/CD pipeline definition |
+| `backend/Dockerfile` | Multi-stage Docker build (builder → runner) — installs `wget` for health checks |
+| `railway.json` | Railway project config — sets builder, Dockerfile path, and build context (`backend/`) |
+| `vercel.json` | Root Vercel config — SPA rewrites for client-side routing |
+| `.github/workflows/deploy.yml` | CI/CD type-check pipeline |
 
 ---
 
@@ -419,8 +425,8 @@ If API requests return 401 after login:
 If you want to deploy the backend on a different Docker-compatible platform (Fly.io, Render, DigitalOcean App Platform, etc.):
 
 ```bash
-# Build the image (run from repo root)
-docker build -t pa-app-backend -f backend/Dockerfile .
+# Build the image (run from repo root — context must be backend/)
+docker build -t pa-app-backend -f backend/Dockerfile backend
 
 # Run locally to test
 docker run -p 3001:3001 \
@@ -429,6 +435,8 @@ docker run -p 3001:3001 \
   -e CORS_ORIGIN=http://localhost:5173 \
   pa-app-backend
 ```
+
+> **Note:** The build context is `backend/` (not the repo root). The Dockerfile uses paths relative to that context. Railway handles this automatically via the `context` setting in `railway.json`.
 
 ---
 
